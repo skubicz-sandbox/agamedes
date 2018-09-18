@@ -37,6 +37,10 @@
                 text="Reimport All Maven Projects" />
         </group>
 
+        <action id="EasyMavenBuilder.RunMaven"
+                icon="AllIcons.General.Run"
+                class="MavenReimportAction"
+                text="Reimport All Maven Projects" />
 
 
         <group id="MyPlugin.SampleMenu" text="Greeting" description="Greeting menu">

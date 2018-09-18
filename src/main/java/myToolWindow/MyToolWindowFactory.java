@@ -18,15 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.JTextPane;
-import javax.swing.JTree;
+import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
@@ -40,6 +32,7 @@ import com.intellij.openapi.fileTypes.PlainTextFileType;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.ui.*;
+import com.intellij.ui.components.JBList;
 import org.apache.batik.util.gui.resource.JToolbarButton;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -104,6 +97,7 @@ public class MyToolWindowFactory implements ToolWindowFactory {
     private JTextField goals;
     private ComboBox goalsComboBox;
     private EditorTextField goalsEditor;
+    private JButton runMavenButton;
 
     public MyToolWindowFactory() {
 
@@ -402,11 +396,13 @@ public class MyToolWindowFactory implements ToolWindowFactory {
 
         final ActionManager actionManager = ActionManager.getInstance();
         ActionToolbar actionToolbar = actionManager.createActionToolbar("EasyMavenBuilderPanel", (DefaultActionGroup)actionManager
-                .getAction("EasyMavenBuilder.ActionsToolbar"), false);
+                .getAction("EasyMavenBuilder.ActionsToolbar"), true);
 
         actionToolbar.setTargetComponent(tree2);
+     //   actionToolbar.setMinimumButtonSize(new Dimension(20, 20));
+     //   actionToolbar.setMiniMode(true);
 
-        myToolWindowContent = new SimpleToolWindowPanel(true);
+        myToolWindowContent = new SimpleToolWindowPanel(true, true);
         ((SimpleToolWindowPanel) myToolWindowContent).setToolbar(actionToolbar.getComponent());
 
         panelContent = new JPanel(new GridBagLayout());
@@ -416,12 +412,20 @@ public class MyToolWindowFactory implements ToolWindowFactory {
         favoritePanel = new JPanel();
         favoritePanel.add(new JLabel("dsa"));
 
-        configPanel = new JPanel(new BorderLayout(1, 1));
-        configPanel.add(button1);
+        configPanel = new JPanel();
+//        GroupLayout layout = new GroupLayout(configPanel);
+//        layout.setAutoCreateGaps(true);
+//        layout.setAutoCreateContainerGaps(true);
+//
+//        configPanel.setLayout(layout);
+        configPanel.setLayout(new BoxLayout(configPanel, BoxLayout.PAGE_AXIS));
+
+        runMavenButton = new JButton();
+        runMavenButton.setIcon(AllIcons.General.Run);
+
+       // configPanel.add(button1);
 
         goals = new JBTextField();
-
-        Object goalComponent;
 
         String [] history = {"dsa"};
         this.goalsComboBox = new ComboBox(history);
@@ -435,10 +439,99 @@ public class MyToolWindowFactory implements ToolWindowFactory {
         this.goalsComboBox.setFocusable(true);
         this.goalsEditor = editor.getEditorComponent();
 
-        goalComponent = this.goalsComboBox;
         (new MavenArgumentsCompletionProvider(project)).apply(this.goalsEditor);
 
-        configPanel.add(goalsComboBox);
+        JLabel label2 = new JLabel("Goals2");
+        JLabel label = new JLabel("Goals");
+       // configPanel.add(label);
+       // configPanel.add(goalsComboBox);
+
+        CheckBoxList<String> profiles = new CheckBoxList<>();
+        profiles.setItems(Lists.newArrayList("prof1", "prof2", "prof4", "prof4", "prof5"), a -> a);
+        JScrollPane profilesScrollPane = ScrollPaneFactory.createScrollPane(profiles);
+        profilesScrollPane.setMaximumSize(new Dimension(150, 200));
+        profilesScrollPane.setMinimumSize(new Dimension(150, 50));
+
+        GridLayout gridLayout = new GridLayout(0, 3);
+
+        JPanel goalsPanel = new JPanel();
+        GroupLayout groupLayout = new GroupLayout(goalsPanel);
+        groupLayout.setAutoCreateGaps(true);
+        groupLayout.setAutoCreateContainerGaps(true);
+
+        goalsPanel.setLayout(groupLayout);
+        groupLayout.setHorizontalGroup(
+                groupLayout.createSequentialGroup()
+                        .addComponent(label)
+                        .addComponent(goalsComboBox)
+                        .addComponent(runMavenButton)
+        );
+        groupLayout.setVerticalGroup(
+                groupLayout.createSequentialGroup()
+                        .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                .addComponent(label, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(goalsComboBox, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(runMavenButton, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        )
+        );
+//        GridBagConstraints c2 = new GridBagConstraints();
+//        c2.fill = GridBagConstraints.HORIZONTAL;
+//        c2.weightx = 1.0;
+//        c2.gridx = 0;
+//        c2.gridy = 0;
+//        goalsPanel.add(label, c2);
+//        c2.fill = GridBagConstraints.HORIZONTAL;
+//        c2.gridx = 1;
+//        c2.gridy = 0;
+//        goalsPanel.add(goalsComboBox, c2);
+//        c2.fill = GridBagConstraints.BOTH;
+//        c2.gridx = 2;
+//        c2.gridy = 0;
+//        goalsPanel.add(runMavenButton, c2);
+
+        JPanel propertiesPanel = new JPanel();
+        JPanel innerPropertiesPanel = new JPanel();
+     //   propertiesPanel.add(profiles);
+
+        GroupLayout propertiesGroupLayout = new GroupLayout(propertiesPanel);
+        propertiesGroupLayout.setAutoCreateGaps(true);
+        propertiesGroupLayout.setAutoCreateContainerGaps(true);
+
+        propertiesPanel.setLayout(propertiesGroupLayout);
+
+        propertiesGroupLayout.setHorizontalGroup(
+                propertiesGroupLayout.createSequentialGroup()
+                        .addComponent(innerPropertiesPanel)
+                        .addComponent(profilesScrollPane)
+        );
+        propertiesGroupLayout.setVerticalGroup(
+                propertiesGroupLayout.createSequentialGroup()
+                        .addGroup(propertiesGroupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                .addComponent(innerPropertiesPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(profilesScrollPane, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        )
+        );
+
+        configPanel.add(goalsPanel);
+        configPanel.add(propertiesPanel);
+
+//        layout.setHorizontalGroup(
+//                layout.createSequentialGroup()
+//                        .addComponent(label)
+//                        .addComponent(goalsComboBox)
+//                        .addComponent(runMavenButton)
+//                        .addComponent(profilesScrollPane)
+//        );
+//        layout.setVerticalGroup(
+//                layout.createSequentialGroup()
+//                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+//                                .addComponent(label, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+//                                .addComponent(goalsComboBox, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+//                                .addComponent(runMavenButton, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+//                                .addComponent(profilesScrollPane)
+//                        )
+//        );
+
      //   configPanel.add(goalsEditor);
 
     //    panelContent.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
@@ -446,22 +539,25 @@ public class MyToolWindowFactory implements ToolWindowFactory {
         c.weightx = 1.0;
         c.gridx = 0;
         c.gridy = 0;
+        c.gridwidth = 2;
         panelContent.add(configPanel, c);
 
         c.weightx = 0.0;
 
         c.fill = GridBagConstraints.BOTH;
-     //   c.weightx = 0.5;
-        c.weighty = 1.0;
+        c.weightx = 1.0;
+      //  c.weighty = 1.0;
         c.gridx = 0;
         c.gridy = 1;
+        c.gridwidth = 1;
         panelContent.add(ScrollPaneFactory.createScrollPane(tree2), c);
 
         c.fill = GridBagConstraints.VERTICAL;
-    //    c.weightx = 0.5;
+        c.weightx = 0.0;
         c.weighty = 1.0;
         c.gridx = 1;
         c.gridy = 1;
+        c.gridwidth = 1;
         panelContent.add(favoritePanel, c);
 
 
