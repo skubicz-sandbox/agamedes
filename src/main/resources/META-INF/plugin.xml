@@ -30,15 +30,24 @@
     </extensions>
 
     <actions>
+        <group id="EasyMavenBuilder.ActionsToolbar">
+            <action id="EasyMavenBuilder.MavenReimport"
+                icon="AllIcons.Actions.Refresh"
+                class="MavenReimportAction"
+                text="Reimport All Maven Projects" />
+        </group>
+
+
+
         <group id="MyPlugin.SampleMenu" text="Greeting" description="Greeting menu">
             <add-to-group group-id="MainMenu" anchor="last"/>
             <action id="Myplugin.Textboxes" class="HelloAction" text="Hello" description="Says hello"/>
         </group>
 
-        <group id="Myplugin.ActionsToolbar">
+<!--        <group id="Myplugin.ActionsToolbar">
             <action id="Myplugin.Refresh"
                     icon="AllIcons.Actions.Refresh"
                     class="HelloAction"  text="Says hello"/>
-        </group>
+        </group>-->
     </actions>
 </idea-plugin>

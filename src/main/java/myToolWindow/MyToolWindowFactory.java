@@ -1,6 +1,13 @@
 package myToolWindow;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.ComponentOrientation;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.reflect.Array;
@@ -17,6 +24,8 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -27,12 +36,15 @@ import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.openapi.fileTypes.PlainTextFileType;
+import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.ui.*;
 import org.apache.batik.util.gui.resource.JToolbarButton;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.concurrency.AsyncPromise;
+import org.jetbrains.idea.maven.execution.MavenArgumentsCompletionProvider;
 import org.jetbrains.idea.maven.execution.MavenRunConfiguration;
 import org.jetbrains.idea.maven.execution.MavenRunConfigurationType;
 import org.jetbrains.idea.maven.execution.MavenRunnerParameters;
@@ -60,9 +72,11 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.components.JBScrollPane;
+import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import com.intellij.ui.treeStructure.Tree;
+import com.intellij.util.ArrayUtilRt;
 
 /**
  * Created by IntelliJ IDEA.
@@ -79,11 +93,17 @@ public class MyToolWindowFactory implements ToolWindowFactory {
     private JLabel currentTime;
     private JLabel timeZone;
     private JPanel myToolWindowContent;
+    private JPanel panelContent;
+    private JPanel configPanel;
+    private JPanel favoritePanel;
     private JTree tree1;
     private JTree tree2;
     private JButton button1;
     private ToolWindow myToolWindow;
 
+    private JTextField goals;
+    private ComboBox goalsComboBox;
+    private EditorTextField goalsEditor;
 
     public MyToolWindowFactory() {
 
@@ -381,13 +401,71 @@ public class MyToolWindowFactory implements ToolWindowFactory {
         tree2.setModel(new DefaultTreeModel(root, false));
 
         final ActionManager actionManager = ActionManager.getInstance();
-        ActionToolbar actionToolbar = actionManager.createActionToolbar("toolbar", (DefaultActionGroup)actionManager.getAction("Myplugin.ActionsToolbar"), false);
+        ActionToolbar actionToolbar = actionManager.createActionToolbar("EasyMavenBuilderPanel", (DefaultActionGroup)actionManager
+                .getAction("EasyMavenBuilder.ActionsToolbar"), false);
 
         actionToolbar.setTargetComponent(tree2);
 
         myToolWindowContent = new SimpleToolWindowPanel(true);
         ((SimpleToolWindowPanel) myToolWindowContent).setToolbar(actionToolbar.getComponent());
-        ((SimpleToolWindowPanel) myToolWindowContent).setContent(ScrollPaneFactory.createScrollPane(tree2));
+
+        panelContent = new JPanel(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        panelContent.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
+
+        favoritePanel = new JPanel();
+        favoritePanel.add(new JLabel("dsa"));
+
+        configPanel = new JPanel(new BorderLayout(1, 1));
+        configPanel.add(button1);
+
+        goals = new JBTextField();
+
+        Object goalComponent;
+
+        String [] history = {"dsa"};
+        this.goalsComboBox = new ComboBox(history);
+//        goalComponent = this.goalsComboBox;
+//        this.goalsLabel.setLabelFor(this.goalsComboBox);
+        this.goalsComboBox.setLightWeightPopupEnabled(false);
+        EditorComboBoxEditor editor = new StringComboboxEditor(project, PlainTextFileType.INSTANCE, this.goalsComboBox);
+        this.goalsComboBox.setRenderer(new EditorComboBoxRenderer(editor));
+        this.goalsComboBox.setEditable(true);
+        this.goalsComboBox.setEditor(editor);
+        this.goalsComboBox.setFocusable(true);
+        this.goalsEditor = editor.getEditorComponent();
+
+        goalComponent = this.goalsComboBox;
+        (new MavenArgumentsCompletionProvider(project)).apply(this.goalsEditor);
+
+        configPanel.add(goalsComboBox);
+     //   configPanel.add(goalsEditor);
+
+    //    panelContent.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 1.0;
+        c.gridx = 0;
+        c.gridy = 0;
+        panelContent.add(configPanel, c);
+
+        c.weightx = 0.0;
+
+        c.fill = GridBagConstraints.BOTH;
+     //   c.weightx = 0.5;
+        c.weighty = 1.0;
+        c.gridx = 0;
+        c.gridy = 1;
+        panelContent.add(ScrollPaneFactory.createScrollPane(tree2), c);
+
+        c.fill = GridBagConstraints.VERTICAL;
+    //    c.weightx = 0.5;
+        c.weighty = 1.0;
+        c.gridx = 1;
+        c.gridy = 1;
+        panelContent.add(favoritePanel, c);
+
+
+        ((SimpleToolWindowPanel) myToolWindowContent).setContent(panelContent);
 
 
 
