@@ -1,20 +1,14 @@
 package myToolWindow;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.ComponentOrientation;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,20 +27,16 @@ import com.intellij.openapi.fileTypes.PlainTextFileType;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.ui.*;
-import com.intellij.ui.components.JBList;
+import com.kubicz.mavenexecutor.model.Mavenize;
+import com.kubicz.mavenexecutor.model.ProjectModule;
+import com.kubicz.mavenexecutor.model.ProjectRoot;
 import org.apache.batik.util.gui.resource.JToolbarButton;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.jetbrains.concurrency.AsyncPromise;
 import org.jetbrains.idea.maven.execution.MavenArgumentsCompletionProvider;
-import org.jetbrains.idea.maven.execution.MavenRunConfiguration;
-import org.jetbrains.idea.maven.execution.MavenRunConfigurationType;
 import org.jetbrains.idea.maven.execution.MavenRunnerParameters;
 import org.jetbrains.idea.maven.execution.MavenRunnerSettings;
 import org.jetbrains.idea.maven.project.MavenGeneralSettings;
 import org.jetbrains.idea.maven.project.MavenProject;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
-import org.jetbrains.idea.maven.project.MavenProjectsManagerWatcher;
 
 import com.google.common.collect.Lists;
 import com.intellij.ProjectTopics;
@@ -62,15 +52,11 @@ import com.intellij.execution.runners.ProgramRunner;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootEvent;
 import com.intellij.openapi.roots.ModuleRootListener;
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
-import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
-import com.intellij.ui.treeStructure.Tree;
-import com.intellij.util.ArrayUtilRt;
 
 /**
  * Created by IntelliJ IDEA.
@@ -136,7 +122,7 @@ public class MyToolWindowFactory implements ToolWindowFactory {
 
               //  MavenProjectsManagerWatcher watcher = new MavenProjectsManagerWatcher();
 
-                ProjectRoot [] labels = {};//getCheckedNodes(ProjectRoot.class, ((CheckboxTree)tree1).getModel());
+                ProjectRoot[] labels = {};//getCheckedNodes(ProjectRoot.class, ((CheckboxTree)tree1).getModel());
 
                 Map<ProjectRoot, List<Mavenize>> projectRootMap = findProjects(tree1.getModel());
                 System.out.println(projectRootMap);
