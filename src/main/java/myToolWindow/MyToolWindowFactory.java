@@ -8,6 +8,7 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.reflect.Array;
@@ -98,6 +99,15 @@ public class MyToolWindowFactory implements ToolWindowFactory {
     private ComboBox goalsComboBox;
     private EditorTextField goalsEditor;
     private JButton runMavenButton;
+    private JCheckBox offlineModeCheckBox;
+    private JCheckBox skipTestCheckBox;
+    private JCheckBox alwaysUpdateModeCheckBox;
+    private JLabel threadsLabel;
+    private JSpinner threadsSpinner;
+    private JCheckBox skipPluginCheckBox;
+    private ComboBox skipPluginComboBox;
+    private EditorTextField skipPluginEditor;
+
 
     public MyToolWindowFactory() {
 
@@ -452,8 +462,6 @@ public class MyToolWindowFactory implements ToolWindowFactory {
         profilesScrollPane.setMaximumSize(new Dimension(150, 200));
         profilesScrollPane.setMinimumSize(new Dimension(150, 50));
 
-        GridLayout gridLayout = new GridLayout(0, 3);
-
         JPanel goalsPanel = new JPanel();
         GroupLayout groupLayout = new GroupLayout(goalsPanel);
         groupLayout.setAutoCreateGaps(true);
@@ -490,8 +498,51 @@ public class MyToolWindowFactory implements ToolWindowFactory {
 //        goalsPanel.add(runMavenButton, c2);
 
         JPanel propertiesPanel = new JPanel();
-        JPanel innerPropertiesPanel = new JPanel();
-     //   propertiesPanel.add(profiles);
+        GridBagLayout gridbag = new GridBagLayout();
+        JPanel innerPropertiesPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints c3 = new GridBagConstraints();
+
+        offlineModeCheckBox = new JCheckBox("Offline");
+        c3.fill = GridBagConstraints.HORIZONTAL;
+        //c3.weightx = 1.0;
+        c3.gridx = 0;
+        c3.gridy = 0;
+        //c3.gridwidth = 2;
+        innerPropertiesPanel.add(offlineModeCheckBox, c3);
+
+        alwaysUpdateModeCheckBox = new JCheckBox("Update snapshots");
+        c3.insets = new Insets(0,20,0,0);
+        c3.fill = GridBagConstraints.HORIZONTAL;
+        c3.gridx = 1;
+        c3.gridy = 0;
+        innerPropertiesPanel.add(alwaysUpdateModeCheckBox, c3);
+
+        skipTestCheckBox = new JCheckBox("Skip tests");
+        c3.insets = new Insets(0,0,0,0);
+        c3.fill = GridBagConstraints.HORIZONTAL;
+        c3.gridx = 0;
+        c3.gridy = 1;
+        innerPropertiesPanel.add(skipTestCheckBox, c3);
+
+        threadsLabel = new JLabel("Threads:");
+        c3.fill = GridBagConstraints.NONE;
+        c3.anchor = GridBagConstraints.LINE_START;
+        c3.insets = new Insets(0,20,0,0);
+        c3.gridx = 1;
+        c3.gridy = 1;
+        innerPropertiesPanel.add(threadsLabel, c3);
+
+        threadsSpinner = new JSpinner();
+        c3.fill = GridBagConstraints.NONE;
+        c3.anchor = GridBagConstraints.EAST;
+        c3.gridx = 1;
+        c3.gridy = 1;
+        innerPropertiesPanel.add(threadsSpinner, c3);
+
+        innerPropertiesPanel.setMaximumSize(new Dimension(200, 300));
+      //  innerPropertiesPanel.setBackground(Color.BLUE);
+
+        JPanel emptyPanel = new JPanel();
 
         GroupLayout propertiesGroupLayout = new GroupLayout(propertiesPanel);
         propertiesGroupLayout.setAutoCreateGaps(true);
@@ -502,18 +553,57 @@ public class MyToolWindowFactory implements ToolWindowFactory {
         propertiesGroupLayout.setHorizontalGroup(
                 propertiesGroupLayout.createSequentialGroup()
                         .addComponent(innerPropertiesPanel)
+                        .addComponent(emptyPanel)
                         .addComponent(profilesScrollPane)
         );
         propertiesGroupLayout.setVerticalGroup(
                 propertiesGroupLayout.createSequentialGroup()
                         .addGroup(propertiesGroupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                 .addComponent(innerPropertiesPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(emptyPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(profilesScrollPane, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        )
+        );
+
+
+        JPanel skipPluginPanel = new JPanel();
+        GroupLayout skipPluginLayout = new GroupLayout(skipPluginPanel);
+        skipPluginLayout.setAutoCreateGaps(true);
+        skipPluginLayout.setAutoCreateContainerGaps(true);
+
+        skipPluginPanel.setLayout(skipPluginLayout);
+
+
+        skipPluginCheckBox = new JCheckBox("Try skip plugins:");
+
+        skipPluginComboBox = new ComboBox();
+        skipPluginComboBox.setLightWeightPopupEnabled(false);
+        EditorComboBoxEditor editor2 = new StringComboboxEditor(project, PlainTextFileType.INSTANCE, skipPluginComboBox);
+        skipPluginComboBox.setRenderer(new EditorComboBoxRenderer(editor2));
+        skipPluginComboBox.setEditable(true);
+        skipPluginComboBox.setEditor(editor2);
+        skipPluginComboBox.setFocusable(true);
+        skipPluginEditor = editor2.getEditorComponent();
+
+        (new MavenPluginsCompletionProvider(project)).apply(skipPluginEditor);
+        innerPropertiesPanel.add(skipPluginComboBox);
+
+        skipPluginLayout.setHorizontalGroup(
+                skipPluginLayout.createSequentialGroup()
+                        .addComponent(skipPluginCheckBox)
+                        .addComponent(skipPluginComboBox)
+        );
+        skipPluginLayout.setVerticalGroup(
+                skipPluginLayout.createSequentialGroup()
+                        .addGroup(skipPluginLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                .addComponent(skipPluginCheckBox, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(skipPluginComboBox, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         )
         );
 
         configPanel.add(goalsPanel);
         configPanel.add(propertiesPanel);
+        configPanel.add(skipPluginPanel);
 
 //        layout.setHorizontalGroup(
 //                layout.createSequentialGroup()

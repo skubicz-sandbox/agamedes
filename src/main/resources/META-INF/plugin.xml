@@ -35,6 +35,24 @@
                 icon="AllIcons.Actions.Refresh"
                 class="MavenReimportAction"
                 text="Reimport All Maven Projects" />
+
+            <separator/>
+
+            <action id="EasyMavenBuilder.JvmOptionsDialog"
+                icon="AllIcons.General.GearPlain"
+                class="OpenJvmOptionsDialogAction"
+                text="Jvm Options" />
+
+            <action id="EasyMavenBuilder.OpenEnvironmentVariablesDialog"
+                icon="AllIcons.Javaee.WebServiceClient"
+                class="OpenEnvironmentVariablesDialogAction"
+                text="Environment Variables" />
+
+            <action id="EasyMavenBuilder.OpenMavenSettings"
+                class="OpenMavenSettingsAction" text="Maven Settings"
+                description="Edit Maven integration settings for the current project"
+                icon="AllIcons.General.ProjectSettings">
+            </action>
         </group>
 
         <action id="EasyMavenBuilder.RunMaven"
