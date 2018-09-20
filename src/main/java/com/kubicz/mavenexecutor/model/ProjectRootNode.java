@@ -1,5 +1,6 @@
 package com.kubicz.mavenexecutor.model;
 
+import lombok.Setter;
 import org.jetbrains.idea.maven.model.MavenId;
 
 import com.intellij.openapi.vfs.VirtualFile;
@@ -11,12 +12,15 @@ import lombok.Getter;
 @Getter
 @EqualsAndHashCode
 @AllArgsConstructor(staticName = "of")
-public class ProjectRoot implements Mavenize {
+public class ProjectRootNode implements Mavenize {
 
     private String displayName;
 
     private MavenId mavenId;
 
-    private VirtualFile virtualFile;
+    @Setter
+    private boolean selected;
+
+    private VirtualFile projectDirectory;
 
 }

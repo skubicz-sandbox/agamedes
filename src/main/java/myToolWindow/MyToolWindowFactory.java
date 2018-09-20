@@ -28,8 +28,8 @@ import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.ui.*;
 import com.kubicz.mavenexecutor.model.Mavenize;
-import com.kubicz.mavenexecutor.model.ProjectModule;
-import com.kubicz.mavenexecutor.model.ProjectRoot;
+import com.kubicz.mavenexecutor.model.ProjectModuleNode;
+import com.kubicz.mavenexecutor.model.ProjectRootNode;
 import org.apache.batik.util.gui.resource.JToolbarButton;
 import org.jetbrains.idea.maven.execution.MavenArgumentsCompletionProvider;
 import org.jetbrains.idea.maven.execution.MavenRunnerParameters;
@@ -122,15 +122,15 @@ public class MyToolWindowFactory implements ToolWindowFactory {
 
               //  MavenProjectsManagerWatcher watcher = new MavenProjectsManagerWatcher();
 
-                ProjectRoot[] labels = {};//getCheckedNodes(ProjectRoot.class, ((CheckboxTree)tree1).getModel());
+                ProjectRootNode[] labels = {};//getCheckedNodes(ProjectRootNode.class, ((CheckboxTree)tree1).getModel());
 
-                Map<ProjectRoot, List<Mavenize>> projectRootMap = findProjects(tree1.getModel());
+                Map<ProjectRootNode, List<Mavenize>> projectRootMap = findProjects(tree1.getModel());
                 System.out.println(projectRootMap);
 
 
                 MyMavenRunConfigurationType runConfigurationType = ConfigurationTypeUtil.findConfigurationType(MyMavenRunConfigurationType.class);
 
-                for(Map.Entry<ProjectRoot, List<Mavenize>> projectRootListEntry : projectRootMap.entrySet()) {
+                for(Map.Entry<ProjectRootNode, List<Mavenize>> projectRootListEntry : projectRootMap.entrySet()) {
                     String module = "";
 
                     for (Mavenize label : projectRootListEntry.getValue()) {
@@ -157,7 +157,7 @@ public class MyToolWindowFactory implements ToolWindowFactory {
                     runConfiguration.setGeneralSettings(mavenGeneralSettings);
                     //parametersList.add("-pl", "app-api");
                     MavenRunnerParameters mavenRunnerParameters = new MavenRunnerParameters();
-                    mavenRunnerParameters.setWorkingDirPath(projectRootListEntry.getKey().getVirtualFile().getPath());
+                    mavenRunnerParameters.setWorkingDirPath(projectRootListEntry.getKey().getProjectDirectory().getPath());
                     mavenRunnerParameters.setGoals(Lists.newArrayList("clean", "install"));
 
                     runConfiguration.setRunnerParameters(mavenRunnerParameters);
@@ -181,13 +181,13 @@ public class MyToolWindowFactory implements ToolWindowFactory {
         });
 
     }
-    public static Map<ProjectRoot, List<Mavenize>> findProjects(final TreeModel model) {
-        Map<ProjectRoot, List<Mavenize>> projectRootMap = new HashMap<>();
+    public static Map<ProjectRootNode, List<Mavenize>> findProjects(final TreeModel model) {
+        Map<ProjectRootNode, List<Mavenize>> projectRootMap = new HashMap<>();
 
         final List<CheckedTreeNode> projectRootNodes = findProjectRootNodes(model);
 
         projectRootNodes.forEach(projectRootNode -> {
-            projectRootMap.put((ProjectRoot)projectRootNode.getUserObject(), getCheckedNodes(Mavenize.class, projectRootNode));
+            projectRootMap.put((ProjectRootNode)projectRootNode.getUserObject(), getCheckedNodes(Mavenize.class, projectRootNode));
         });
 
 
@@ -207,13 +207,13 @@ public class MyToolWindowFactory implements ToolWindowFactory {
             public void collect(CheckedTreeNode node) {
                 if (node.isLeaf()) {
                     Object userObject = node.getUserObject();
-                    if (userObject != null && ProjectRoot.class.isAssignableFrom(userObject.getClass())) {
+                    if (userObject != null && ProjectRootNode.class.isAssignableFrom(userObject.getClass())) {
                         nodes.add(node);
                     }
                 }
                 else {
                     Object userObject = node.getUserObject();
-                    if(userObject != null && ProjectRoot.class.isAssignableFrom(userObject.getClass())) {
+                    if(userObject != null && ProjectRootNode.class.isAssignableFrom(userObject.getClass())) {
                         nodes.add(node);
                     }
                     for (int i = 0; i < node.getChildCount(); i++) {
@@ -338,7 +338,7 @@ public class MyToolWindowFactory implements ToolWindowFactory {
         CheckedTreeNode root = new CheckedTreeNode(null);
         for(MavenProject mavenProject : projectsManager.getRootProjects()) {
             JLabel label2 = new JLabel(mavenProject.getMavenId().getGroupId() + ":" + mavenProject.getMavenId().getArtifactId());
-            CheckedTreeNode rootProject = new CheckedTreeNode(ProjectRoot.of(mavenProject.getDisplayName(), mavenProject.getMavenId(),
+            CheckedTreeNode rootProject = new CheckedTreeNode(ProjectRootNode.of(mavenProject.getDisplayName(), mavenProject.getMavenId(), false,
                     mavenProject.getDirectoryFile()));
             rootProject.setChecked(false);
 
@@ -656,7 +656,7 @@ public class MyToolWindowFactory implements ToolWindowFactory {
             System.out.println(offset + mavenProject.getDisplayName());
            // CheckedTreeNode projectNode = new CheckedTreeNode(new JLabel(mavenProject.getMavenId().getGroupId() + ":" + mavenProject
            //         .getMavenId().getArtifactId()));
-            CheckedTreeNode projectNode = new CheckedTreeNode(ProjectModule.of(mavenProject.getDisplayName(), mavenProject.getMavenId()));
+            CheckedTreeNode projectNode = new CheckedTreeNode(ProjectModuleNode.of(mavenProject.getDisplayName(), mavenProject.getMavenId()));
             projectNode.setChecked(false);
             root.add(projectNode);
             findChildren(mavenProject, projectsManager, offset, projectNode);

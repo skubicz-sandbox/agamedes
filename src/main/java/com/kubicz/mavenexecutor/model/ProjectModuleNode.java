@@ -10,7 +10,7 @@ import lombok.Getter;
 @Getter
 @EqualsAndHashCode
 @AllArgsConstructor(staticName = "of")
-public class ProjectModule implements Mavenize {
+public class ProjectModuleNode implements Mavenize {
 
     private String displayName;
 

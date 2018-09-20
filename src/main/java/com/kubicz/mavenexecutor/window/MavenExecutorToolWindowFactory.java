@@ -14,8 +14,13 @@ import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.*;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
+import com.kubicz.mavenexecutor.model.Mavenize;
+import com.kubicz.mavenexecutor.model.ProjectRootNode;
+import com.kubicz.mavenexecutor.model.ProjectToBuild;
 import myToolWindow.MavenPluginsCompletionProvider;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.execution.MavenArgumentsCompletionProvider;
+import org.jetbrains.idea.maven.model.MavenId;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
 
 import javax.swing.*;
@@ -24,6 +29,10 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
@@ -70,6 +79,8 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
 
     private EditorTextField skipPluginEditor;
 
+    private MavenExecutorSetting runSetting;
+
     public MavenExecutorToolWindowFactory() {
 
     }
@@ -83,6 +94,7 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
         this.project = project;
         this.toolWindow = toolWindow;
         this.toolWindowContent = new SimpleToolWindowPanel(true, true);
+        this.runSetting = MavenExecutorService.getInstance(project).getSetting();
 
         createWindowToolbar();
 
@@ -95,7 +107,7 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
 
     private void createWindowToolbar() {
         final ActionManager actionManager = ActionManager.getInstance();
-        ActionToolbar actionToolbar = actionManager.createActionToolbar("EasyMavenBuilderPanel", (DefaultActionGroup)actionManager
+        ActionToolbar actionToolbar = actionManager.createActionToolbar("EasyMavenBuilderPanel", (DefaultActionGroup) actionManager
                 .getAction("EasyMavenBuilder.ActionsToolbar"), true);
 
 //        actionToolbar.setTargetComponent(projectsTreeView.getTreeComponent());
@@ -111,20 +123,17 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
         MavenProjectsManager projectsManager = MavenProjectsManager.getInstance(project);
 
         projectsTreeView = new MavenProjectsTreeView(projectsManager);
-        projectsTreeView.addFocusLostListener(new FocusAdapter() {
-            @Override
-            public void focusLost(final FocusEvent e) {
-                System.out.println(e);
-            }
-        });
+        projectsTreeView.addFocusLostListener(new MavenProjectsTreeViewListener(runSetting, projectsTreeView));
 
         createFavoritePanel();
 
         createConfigPanel();
 
-        mainContent.add(configPanel, new GridBagConstraintsBuilder().fillHorizontal().gridx(0).gridy(0).weightx(1.0).gridwidth(2).build());
-        mainContent.add(ScrollPaneFactory.createScrollPane(projectsTreeView.getTreeComponent()), new GridBagConstraintsBuilder().fillBoth().weightx(1.0).gridx(0).gridy(1).build());
-        mainContent.add(favoritePanel, new GridBagConstraintsBuilder().fillVertical().weightx(0.0).weighty(1.0).gridx(1).gridy(1).build());
+        JScrollPane scrollPane = ScrollPaneFactory.createScrollPane(projectsTreeView.getTreeComponent());
+
+        mainContent.add(configPanel, bagConstraintsBuilder().fillHorizontal().gridx(0).gridy(0).weightx(1.0).gridwidth(2).build());
+        mainContent.add(scrollPane, bagConstraintsBuilder().fillBoth().weightx(1.0).gridx(0).gridy(1).build());
+        mainContent.add(favoritePanel, bagConstraintsBuilder().fillVertical().weightx(0.0).weighty(1.0).gridx(1).gridy(1).build());
 
         toolWindowContent.setContent(mainContent);
     }
@@ -154,7 +163,7 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
     }
 
     private void createGoalsSubPanel() {
-        String [] history = {""};
+        String[] history = {""};
         this.goalsComboBox = new ComboBox(history);
 
 
@@ -170,7 +179,7 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
             @Override
             public void focusLost(final FocusEvent e) {
                 String goalsText = goalsComboBox.getEditor().getItem() + "";
-                MavenExecutorService.getInstance(project).getSetting().setGoals(Lists.newArrayList(goalsText.split("\\s")));
+                runSetting.setGoals(Lists.newArrayList(goalsText.split("\\s")));
             }
         });
 
@@ -205,29 +214,40 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
         JPanel innerPropertiesPanel = new JPanel(new GridBagLayout());
 
         offlineModeCheckBox = new JCheckBox("Offline");
-        innerPropertiesPanel.add(offlineModeCheckBox, new GridBagConstraintsBuilder().fillHorizontal().build());
+        innerPropertiesPanel.add(offlineModeCheckBox, bagConstraintsBuilder().fillHorizontal().build());
 
         alwaysUpdateModeCheckBox = new JCheckBox("Update snapshots");
 
         alwaysUpdateModeCheckBox.addActionListener(event -> {
-            MavenExecutorService.getInstance(project).getSetting().setAlwaysUpdateSnapshot(alwaysUpdateModeCheckBox.isSelected());
+            runSetting.setAlwaysUpdateSnapshot(alwaysUpdateModeCheckBox.isSelected());
         });
-        innerPropertiesPanel.add(alwaysUpdateModeCheckBox, new GridBagConstraintsBuilder().fillHorizontal().insetLeft(20).gridx(1).gridy(0).build());
+        innerPropertiesPanel.add(alwaysUpdateModeCheckBox, bagConstraintsBuilder().fillHorizontal().insetLeft(20).gridx(1).gridy(0).build());
 
         skipTestCheckBox = new JCheckBox("Skip tests");
-        innerPropertiesPanel.add(skipTestCheckBox, new GridBagConstraintsBuilder().fillHorizontal().gridx(0).gridy(1).build());
+        innerPropertiesPanel.add(skipTestCheckBox, bagConstraintsBuilder().fillHorizontal().gridx(0).gridy(1).build());
 
         skipTestCheckBox.addActionListener(event -> {
-            MavenExecutorService.getInstance(project).getSetting().setSkipTests(skipTestCheckBox.isSelected());
+            runSetting.setSkipTests(skipTestCheckBox.isSelected());
         });
 
         threadsLabel = new JLabel("Threads:");
-        innerPropertiesPanel.add(threadsLabel, new GridBagConstraintsBuilder().anchorWest().fillNone().insetLeft(20).gridx(1).gridy(1).build());
+        innerPropertiesPanel.add(threadsLabel, bagConstraintsBuilder().anchorWest().fillNone().insetLeft(20).gridx(1).gridy(1).build());
 
-        threadsSpinner = new JSpinner();
-        innerPropertiesPanel.add(threadsSpinner, new GridBagConstraintsBuilder().anchorEast().fillNone().gridx(1).gridy(1).build());
+        threadsSpinner = new JBIntSpinner(0, 0, 20);
+        threadsSpinner.addChangeListener(event -> {
+            threadsSpinner.setEnabled(false);
+            threadsSpinner.setEnabled(true);
+        });
+        threadsSpinner.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                threadsSpinner.setEnabled(false);
+                threadsSpinner.setEnabled(true);
+            }
+        });
+        innerPropertiesPanel.add(threadsSpinner, bagConstraintsBuilder().anchorEast().fillNone().gridx(1).gridy(1).build());
 
-        innerPropertiesPanel.setMaximumSize(new Dimension(200, 300));
+        innerPropertiesPanel.setMaximumSize(new Dimension(200, 50));
 
         JPanel emptyPanel = new JPanel();
 
@@ -235,7 +255,7 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
         CheckBoxList<String> profiles = new CheckBoxList<>();
         profiles.setItems(Lists.newArrayList("prof1", "prof2", "prof4", "prof4", "prof5"), a -> a);
         JScrollPane profilesScrollPane = ScrollPaneFactory.createScrollPane(profiles);
-        profilesScrollPane.setMaximumSize(new Dimension(150, 200));
+        profilesScrollPane.setMaximumSize(new Dimension(150, 50));
         profilesScrollPane.setMinimumSize(new Dimension(150, 50));
 
         GroupLayout propertiesGroupLayout = new GroupLayout(propertiesSubPanel);
@@ -255,7 +275,7 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
                         .addGroup(propertiesGroupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                 .addComponent(innerPropertiesPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(emptyPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(profilesScrollPane, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(profilesScrollPane)
                         )
         );
     }
@@ -277,7 +297,13 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
         skipPluginComboBox.setEditable(true);
         skipPluginComboBox.setEditor(editor);
         skipPluginComboBox.setFocusable(true);
+        skipPluginComboBox.setEnabled(skipPluginCheckBox.isSelected());
         skipPluginEditor = editor.getEditorComponent();
+
+        skipPluginCheckBox.addActionListener(event -> {
+            skipPluginComboBox.setEnabled(skipPluginCheckBox.isSelected());
+
+        });
 
         (new MavenPluginsCompletionProvider(project)).apply(skipPluginEditor);
 
@@ -293,6 +319,11 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
                                 .addComponent(skipPluginComboBox, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         )
         );
+    }
+
+    @NotNull
+    private GridBagConstraintsBuilder bagConstraintsBuilder() {
+        return new GridBagConstraintsBuilder();
     }
 
 }

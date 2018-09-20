@@ -11,11 +11,12 @@ import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.runners.ProgramRunner;
 import com.intellij.openapi.project.Project;
 import com.kubicz.mavenexecutor.model.Mavenize;
-import com.kubicz.mavenexecutor.model.ProjectRoot;
+import com.kubicz.mavenexecutor.model.ProjectRootNode;
 import myToolWindow.MyMavenRunConfiguration;
 import myToolWindow.MyMavenRunConfigurationType;
 import org.jetbrains.idea.maven.execution.MavenRunnerParameters;
 import org.jetbrains.idea.maven.execution.MavenRunnerSettings;
+import org.jetbrains.idea.maven.model.MavenId;
 import org.jetbrains.idea.maven.project.MavenGeneralSettings;
 
 import java.awt.event.ActionEvent;
@@ -41,20 +42,20 @@ public class RunMavenActionListener implements ActionListener {
 
         MyMavenRunConfigurationType runConfigurationType = ConfigurationTypeUtil.findConfigurationType(MyMavenRunConfigurationType.class);
 
-        Map<ProjectRoot, List<Mavenize>> projectRootMap = projectsTree.findSelectedProjects();
+        Map<ProjectRootNode, List<Mavenize>> projectRootMap = projectsTree.findSelectedProjects();
 
-        for(Map.Entry<ProjectRoot, List<Mavenize>> projectRootListEntry : projectRootMap.entrySet()) {
+        runSetting.getProjectsToBuild().forEach(projectToBuild -> {
             String module = "";
 
-            if(!projectRootListEntry.getValue().isEmpty()) {
-                for (Mavenize label : projectRootListEntry.getValue()) {
-                    module = module + label.getMavenId().getGroupId() + ":" + label.getMavenId().getArtifactId() + ",";
+            if(!projectToBuild.buildEntireProject()) {
+                for (MavenId label : projectToBuild.getSelectedModule()) {
+                    module = module + label.getGroupId() + ":" + label.getArtifactId() + ",";
                 }
                 module = module.substring(0, module.lastIndexOf(','));
             }
 
             final RunnerAndConfigurationSettings settings = RunManagerEx.getInstanceEx(project)
-                    .createRunConfiguration(projectRootListEntry.getKey().getDisplayName(), runConfigurationType.getConfigurationFactories()[0]);
+                    .createRunConfiguration(projectToBuild.getDisplayName(), runConfigurationType.getConfigurationFactories()[0]);
 
             settings.setActivateToolWindowBeforeRun(true);
 
@@ -76,7 +77,7 @@ public class RunMavenActionListener implements ActionListener {
             runConfiguration.setGeneralSettings(mavenGeneralSettings);
             //parametersList.add("-pl", "app-api");
             MavenRunnerParameters mavenRunnerParameters = new MavenRunnerParameters();
-            mavenRunnerParameters.setWorkingDirPath(projectRootListEntry.getKey().getVirtualFile().getPath());
+            mavenRunnerParameters.setWorkingDirPath(projectToBuild.getProjectDictionary());
             mavenRunnerParameters.setGoals(runSetting.getGoals());
 
             runConfiguration.setRunnerParameters(mavenRunnerParameters);
@@ -93,6 +94,7 @@ public class RunMavenActionListener implements ActionListener {
             catch (ExecutionException e) {
                 e.printStackTrace();
             }
-        }
+        });
+
     }
 }

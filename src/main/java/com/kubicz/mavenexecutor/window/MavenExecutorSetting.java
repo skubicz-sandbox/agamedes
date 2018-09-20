@@ -2,6 +2,7 @@ package com.kubicz.mavenexecutor.window;
 
 import java.util.List;
 
+import com.kubicz.mavenexecutor.model.ProjectToBuild;
 import lombok.ToString;
 
 @ToString
@@ -20,6 +21,8 @@ public class MavenExecutorSetting {
     private boolean alwaysUpdateSnapshot;
 
     private boolean skipTests;
+
+    private List<ProjectToBuild> projectsToBuild;
 
     public List<String> getGoals() {
         return goals;
@@ -83,4 +86,13 @@ public class MavenExecutorSetting {
         this.skipTests = skipTests;
         return this;
     }
+
+    public List<ProjectToBuild> getProjectsToBuild() {
+        return projectsToBuild;
+    }
+
+    public void setProjectsToBuild(List<ProjectToBuild> projectsToBuild) {
+        this.projectsToBuild = projectsToBuild;
+    }
+
 }
