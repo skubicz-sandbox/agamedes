@@ -6,20 +6,21 @@ import org.jetbrains.annotations.NotNull;
 
 public class MavenExecutorService {
 
-    private String setting;
+    private MavenExecutorSetting setting;
 
     public MavenExecutorService(Project project) {
+        this.setting = new MavenExecutorSetting();
     }
 
     public static MavenExecutorService getInstance(@NotNull Project project) {
         return ServiceManager.getService(project, MavenExecutorService.class);
     }
 
-    public String getSetting() {
+    public MavenExecutorSetting getSetting() {
         return setting;
     }
 
-    public void setSetting(String setting) {
+    public void setSetting(MavenExecutorSetting setting) {
         this.setting = setting;
     }
 }

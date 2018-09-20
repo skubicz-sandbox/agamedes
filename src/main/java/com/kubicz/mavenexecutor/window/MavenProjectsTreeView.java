@@ -1,6 +1,7 @@
 package com.kubicz.mavenexecutor.window;
 
 import com.intellij.ui.CheckboxTree;
+import com.intellij.ui.CheckboxTreeAdapter;
 import com.intellij.ui.CheckedTreeNode;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.SimpleTextAttributes;
@@ -16,6 +17,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +27,7 @@ import java.util.Map;
 
 public class MavenProjectsTreeView {
 
-    private JTree tree;
+    private CheckboxTree tree;
 
     private CheckboxTree.CheckboxTreeCellRenderer renderer = new CheckboxTree.CheckboxTreeCellRenderer() {
         @Override
@@ -58,31 +62,29 @@ public class MavenProjectsTreeView {
         this.tree = new CheckboxTree(renderer, root);
     }
 
+    public void addFocusLostListener(FocusListener focusListener) {
+        this.tree.addFocusListener(focusListener);
+    }
+
     public JTree getTreeComponent() {
         return tree;
     }
 
-    private void findChildren(MavenProject rootProject, MavenProjectsManager projectsManager, String offset, CheckedTreeNode root) {
-        offset = offset + "  ";
-
-        for(MavenProject mavenProject : projectsManager.findInheritors(rootProject)) {
-            System.out.println(offset + mavenProject.getDisplayName());
-            // CheckedTreeNode projectNode = new CheckedTreeNode(new JLabel(mavenProject.getMavenId().getGroupId() + ":" + mavenProject
-            //         .getMavenId().getArtifactId()));
-            CheckedTreeNode projectNode = new CheckedTreeNode(ProjectModule.of(mavenProject.getDisplayName(), mavenProject.getMavenId()));
-            projectNode.setChecked(false);
-            root.add(projectNode);
-            findChildren(mavenProject, projectsManager, offset, projectNode);
-        }
-    }
-
-    public Map<ProjectRoot, java.util.List<Mavenize>> findProjects() {
+    public Map<ProjectRoot, java.util.List<Mavenize>> findSelectedProjects() {
         Map<ProjectRoot, java.util.List<Mavenize>> projectRootMap = new HashMap<>();
 
         final java.util.List<CheckedTreeNode> projectRootNodes = findProjectRootNodes(tree.getModel());
 
         projectRootNodes.forEach(projectRootNode -> {
-            projectRootMap.put((ProjectRoot)projectRootNode.getUserObject(), getCheckedNodes(Mavenize.class, projectRootNode));
+            if(projectRootNode.isChecked()) {
+                projectRootMap.put((ProjectRoot)projectRootNode.getUserObject(), new ArrayList<>());
+            }
+            else {
+                List<Mavenize> subModules = getCheckedNodes(Mavenize.class, projectRootNode);
+                if(!subModules.isEmpty()) {
+                    projectRootMap.put((ProjectRoot) projectRootNode.getUserObject(), subModules);
+                }
+            }
         });
 
 
@@ -159,6 +161,20 @@ public class MavenProjectsTreeView {
         }.collect(root);
 
         return nodes;
+    }
+
+    private void findChildren(MavenProject rootProject, MavenProjectsManager projectsManager, String offset, CheckedTreeNode root) {
+        offset = offset + "  ";
+
+        for(MavenProject mavenProject : projectsManager.findInheritors(rootProject)) {
+            System.out.println(offset + mavenProject.getDisplayName());
+            // CheckedTreeNode projectNode = new CheckedTreeNode(new JLabel(mavenProject.getMavenId().getGroupId() + ":" + mavenProject
+            //         .getMavenId().getArtifactId()));
+            CheckedTreeNode projectNode = new CheckedTreeNode(ProjectModule.of(mavenProject.getDisplayName(), mavenProject.getMavenId()));
+            projectNode.setChecked(false);
+            root.add(projectNode);
+            findChildren(mavenProject, projectsManager, offset, projectNode);
+        }
     }
 
 }

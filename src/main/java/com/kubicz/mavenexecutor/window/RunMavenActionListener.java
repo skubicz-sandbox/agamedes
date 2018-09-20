@@ -1,6 +1,5 @@
 package com.kubicz.mavenexecutor.window;
 
-import com.google.common.collect.Lists;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.Executor;
 import com.intellij.execution.RunManagerEx;
@@ -37,42 +36,48 @@ public class RunMavenActionListener implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent event) {
-
-        System.out.println(MavenExecutorService.getInstance(project).getSetting());
+        MavenExecutorSetting runSetting = MavenExecutorService.getInstance(project).getSetting();
+        System.out.println(runSetting);
 
         MyMavenRunConfigurationType runConfigurationType = ConfigurationTypeUtil.findConfigurationType(MyMavenRunConfigurationType.class);
 
-        Map<ProjectRoot, List<Mavenize>> projectRootMap = projectsTree.findProjects();
+        Map<ProjectRoot, List<Mavenize>> projectRootMap = projectsTree.findSelectedProjects();
 
         for(Map.Entry<ProjectRoot, List<Mavenize>> projectRootListEntry : projectRootMap.entrySet()) {
             String module = "";
 
-            for (Mavenize label : projectRootListEntry.getValue()) {
-                module = module + label.getMavenId().getGroupId() + ":" + label.getMavenId().getArtifactId() + ",";
+            if(!projectRootListEntry.getValue().isEmpty()) {
+                for (Mavenize label : projectRootListEntry.getValue()) {
+                    module = module + label.getMavenId().getGroupId() + ":" + label.getMavenId().getArtifactId() + ",";
+                }
+                module = module.substring(0, module.lastIndexOf(','));
             }
-            module = module.substring(0, module.lastIndexOf(','));
 
             final RunnerAndConfigurationSettings settings = RunManagerEx.getInstanceEx(project)
-                    .createRunConfiguration("213", runConfigurationType.getConfigurationFactories()[0]);
+                    .createRunConfiguration(projectRootListEntry.getKey().getDisplayName(), runConfigurationType.getConfigurationFactories()[0]);
 
             settings.setActivateToolWindowBeforeRun(true);
 
             MyMavenRunConfiguration runConfiguration = (MyMavenRunConfiguration) settings.getConfiguration();
             MavenRunnerSettings mavenRunnerSettings = new MavenRunnerSettings();
+            mavenRunnerSettings.setSkipTests(runSetting.isSkipTests());
             //        Map<String, String> mavenProperties =  new HashMap<>();
             runConfiguration.mavenProperties.clear();
-            runConfiguration.mavenProperties.put("-pl", module);
+            if(!module.isEmpty()) {
+                runConfiguration.mavenProperties.put("-pl", module);
+            }
 
             //   mavenRunnerSettings.setVmOptions("-pl " + module);
             runConfiguration.setRunnerSettings(mavenRunnerSettings);
 
             MavenGeneralSettings mavenGeneralSettings = new MavenGeneralSettings();
+            mavenGeneralSettings.setAlwaysUpdateSnapshots(runSetting.isAlwaysUpdateSnapshot());
 
             runConfiguration.setGeneralSettings(mavenGeneralSettings);
             //parametersList.add("-pl", "app-api");
             MavenRunnerParameters mavenRunnerParameters = new MavenRunnerParameters();
             mavenRunnerParameters.setWorkingDirPath(projectRootListEntry.getKey().getVirtualFile().getPath());
-            mavenRunnerParameters.setGoals(Lists.newArrayList("clean", "install"));
+            mavenRunnerParameters.setGoals(runSetting.getGoals());
 
             runConfiguration.setRunnerParameters(mavenRunnerParameters);
 

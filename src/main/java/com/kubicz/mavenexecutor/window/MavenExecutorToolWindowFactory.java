@@ -20,6 +20,8 @@ import org.jetbrains.idea.maven.project.MavenProjectsManager;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
@@ -70,7 +72,6 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
 
     public MavenExecutorToolWindowFactory() {
 
-
     }
 
     private void createUIComponents() {
@@ -110,6 +111,12 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
         MavenProjectsManager projectsManager = MavenProjectsManager.getInstance(project);
 
         projectsTreeView = new MavenProjectsTreeView(projectsManager);
+        projectsTreeView.addFocusLostListener(new FocusAdapter() {
+            @Override
+            public void focusLost(final FocusEvent e) {
+                System.out.println(e);
+            }
+        });
 
         createFavoritePanel();
 
@@ -159,6 +166,14 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
         this.goalsComboBox.setFocusable(true);
         this.goalsEditor = editor.getEditorComponent();
 
+        goalsEditor.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(final FocusEvent e) {
+                String goalsText = goalsComboBox.getEditor().getItem() + "";
+                MavenExecutorService.getInstance(project).getSetting().setGoals(Lists.newArrayList(goalsText.split("\\s")));
+            }
+        });
+
         (new MavenArgumentsCompletionProvider(project)).apply(this.goalsEditor);
 
         JLabel label = new JLabel("Goals");
@@ -195,14 +210,16 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
         alwaysUpdateModeCheckBox = new JCheckBox("Update snapshots");
 
         alwaysUpdateModeCheckBox.addActionListener(event -> {
-
-            MavenExecutorService.getInstance(project).setSetting(goalsComboBox.getEditor().getItem() + "");
-            System.out.println("ds");
+            MavenExecutorService.getInstance(project).getSetting().setAlwaysUpdateSnapshot(alwaysUpdateModeCheckBox.isSelected());
         });
         innerPropertiesPanel.add(alwaysUpdateModeCheckBox, new GridBagConstraintsBuilder().fillHorizontal().insetLeft(20).gridx(1).gridy(0).build());
 
         skipTestCheckBox = new JCheckBox("Skip tests");
         innerPropertiesPanel.add(skipTestCheckBox, new GridBagConstraintsBuilder().fillHorizontal().gridx(0).gridy(1).build());
+
+        skipTestCheckBox.addActionListener(event -> {
+            MavenExecutorService.getInstance(project).getSetting().setSkipTests(skipTestCheckBox.isSelected());
+        });
 
         threadsLabel = new JLabel("Threads:");
         innerPropertiesPanel.add(threadsLabel, new GridBagConstraintsBuilder().anchorWest().fillNone().insetLeft(20).gridx(1).gridy(1).build());
@@ -250,7 +267,6 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
         skipPluginLayout.setAutoCreateContainerGaps(true);
 
         skipPluginSubPanel.setLayout(skipPluginLayout);
-
 
         skipPluginCheckBox = new JCheckBox("Try skip plugins:");
 
