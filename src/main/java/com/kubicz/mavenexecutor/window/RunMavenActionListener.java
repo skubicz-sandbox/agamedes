@@ -61,6 +61,7 @@ public class RunMavenActionListener implements ActionListener {
 
             MyMavenRunConfiguration runConfiguration = (MyMavenRunConfiguration) settings.getConfiguration();
             MavenRunnerSettings mavenRunnerSettings = new MavenRunnerSettings();
+     //       mavenRunnerSettings.setVmOptions(runSetting.getJvmOptions().get(0));
             mavenRunnerSettings.setSkipTests(runSetting.isSkipTests());
             //        Map<String, String> mavenProperties =  new HashMap<>();
             runConfiguration.mavenProperties.clear();

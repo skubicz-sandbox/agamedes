@@ -1,6 +1,10 @@
 package com.kubicz.mavenexecutor.window;
 
 import com.google.common.collect.Lists;
+import com.intellij.codeInsight.hint.HintManager;
+import com.intellij.codeInsight.hint.HintManagerImpl;
+import com.intellij.codeInsight.hint.HintUtil;
+import com.intellij.codeInsight.hint.TooltipController;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
@@ -11,28 +15,24 @@ import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
+import com.intellij.openapi.wm.WindowManager;
 import com.intellij.ui.*;
+import com.intellij.ui.awt.RelativePoint;
+import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
-import com.kubicz.mavenexecutor.model.Mavenize;
-import com.kubicz.mavenexecutor.model.ProjectRootNode;
-import com.kubicz.mavenexecutor.model.ProjectToBuild;
+
 import myToolWindow.MavenPluginsCompletionProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.execution.MavenArgumentsCompletionProvider;
-import org.jetbrains.idea.maven.model.MavenId;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 
 public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
@@ -71,7 +71,7 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
 
     private JLabel threadsLabel;
 
-    private JSpinner threadsSpinner;
+    private JTextField threadsTextField;
 
     private JCheckBox skipPluginCheckBox;
 
@@ -162,6 +162,10 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
         configPanel.add(skipPluginSubPanel);
     }
 
+    private boolean canExecute() {
+        return !runSetting.getGoals().isEmpty() && !runSetting.getProjectsToBuild().isEmpty();
+    }
+
     private void createGoalsSubPanel() {
         String[] history = {""};
         this.goalsComboBox = new ComboBox(history);
@@ -175,11 +179,24 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
         this.goalsComboBox.setFocusable(true);
         this.goalsEditor = editor.getEditorComponent();
 
+//        runMavenButton.addMouseListener(new MouseAdapter() {
+//            @Override
+//            public void mouseClicked(final MouseEvent e) {
+//                if(!canExecute()) {
+//                    HintManagerImpl
+//                            .getInstanceImpl()
+//                            .showHint(new JLabel("Enter goals and select projects."), new RelativePoint(e.getLocationOnScreen()),
+//                                    HintManager.HIDE_BY_ANY_KEY, 1500);
+//                }
+//            }
+//        });
         goalsEditor.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(final FocusEvent e) {
                 String goalsText = goalsComboBox.getEditor().getItem() + "";
-                runSetting.setGoals(Lists.newArrayList(goalsText.split("\\s")));
+                if(!goalsText.isEmpty()) {
+                    runSetting.setGoals(Lists.newArrayList(goalsText.split("\\s")));
+                }
             }
         });
 
@@ -233,30 +250,27 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
         threadsLabel = new JLabel("Threads:");
         innerPropertiesPanel.add(threadsLabel, bagConstraintsBuilder().anchorWest().fillNone().insetLeft(20).gridx(1).gridy(1).build());
 
-        threadsSpinner = new JBIntSpinner(0, 0, 20);
-        threadsSpinner.addChangeListener(event -> {
-            threadsSpinner.setEnabled(false);
-            threadsSpinner.setEnabled(true);
-        });
-        threadsSpinner.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                threadsSpinner.setEnabled(false);
-                threadsSpinner.setEnabled(true);
-            }
-        });
-        innerPropertiesPanel.add(threadsSpinner, bagConstraintsBuilder().anchorEast().fillNone().gridx(1).gridy(1).build());
+        threadsTextField = new JBTextField(2);
+        innerPropertiesPanel.add(threadsTextField, bagConstraintsBuilder().anchorEast().fillNone().gridx(1).gridy(1).build());
 
         innerPropertiesPanel.setMaximumSize(new Dimension(200, 50));
 
         JPanel emptyPanel = new JPanel();
 
 
-        CheckBoxList<String> profiles = new CheckBoxList<>();
-        profiles.setItems(Lists.newArrayList("prof1", "prof2", "prof4", "prof4", "prof5"), a -> a);
+        CustomCheckBoxList profiles = new CustomCheckBoxList();
+        MavenProjectsManager projectsManager = MavenProjectsManager.getInstance(project);
+        profiles.setItems(Lists.newArrayList(projectsManager.getAvailableProfiles()), a -> a);
+        profiles.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(final FocusEvent e) {
+                runSetting.setProfiles(profiles.getSelectedItemNames());
+            }
+        });
+
         JScrollPane profilesScrollPane = ScrollPaneFactory.createScrollPane(profiles);
-        profilesScrollPane.setMaximumSize(new Dimension(150, 50));
-        profilesScrollPane.setMinimumSize(new Dimension(150, 50));
+        profilesScrollPane.setMaximumSize(new Dimension(150, 80));
+        profilesScrollPane.setMinimumSize(new Dimension(150, 80));
 
         GroupLayout propertiesGroupLayout = new GroupLayout(propertiesSubPanel);
         propertiesGroupLayout.setAutoCreateGaps(true);

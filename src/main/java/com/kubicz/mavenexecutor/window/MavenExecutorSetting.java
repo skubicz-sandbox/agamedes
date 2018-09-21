@@ -1,6 +1,9 @@
 package com.kubicz.mavenexecutor.window;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.kubicz.mavenexecutor.model.ProjectToBuild;
 import lombok.ToString;
@@ -14,6 +17,10 @@ public class MavenExecutorSetting {
 
     private List<String> pluginsToSkip;
 
+    private List<String> jvmOptions;
+
+    private Map<String, String> environmentProperties;
+
     private boolean trySkipPlugins;
 
     private boolean offlineMode;
@@ -23,6 +30,15 @@ public class MavenExecutorSetting {
     private boolean skipTests;
 
     private List<ProjectToBuild> projectsToBuild;
+
+    public MavenExecutorSetting() {
+        goals = new ArrayList<>();
+        profiles = new ArrayList<>();
+        pluginsToSkip = new ArrayList<>();
+        projectsToBuild = new ArrayList<>();
+        jvmOptions = new ArrayList<>();
+        environmentProperties = new HashMap<>();
+    }
 
     public List<String> getGoals() {
         return goals;
@@ -95,4 +111,21 @@ public class MavenExecutorSetting {
         this.projectsToBuild = projectsToBuild;
     }
 
+    public List<String> getJvmOptions() {
+        return jvmOptions;
+    }
+
+    public MavenExecutorSetting setJvmOptions(final List<String> jvmOptions) {
+        this.jvmOptions = jvmOptions;
+        return this;
+    }
+
+    public Map<String, String> getEnvironmentProperties() {
+        return environmentProperties;
+    }
+
+    public MavenExecutorSetting setEnvironmentProperties(final Map<String, String> environmentProperties) {
+        this.environmentProperties = environmentProperties;
+        return this;
+    }
 }

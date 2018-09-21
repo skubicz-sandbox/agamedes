@@ -1,3 +1,6 @@
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.google.common.collect.Lists;
 import com.intellij.execution.ExecutionBundle;
 import com.intellij.execution.util.EnvVariablesTable;
@@ -5,6 +8,7 @@ import com.intellij.execution.util.EnvironmentVariable;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.DialogBuilder;
+import com.kubicz.mavenexecutor.window.MavenExecutorService;
 
 
 public class OpenEnvironmentVariablesDialogAction extends AnAction {
@@ -24,9 +28,12 @@ public class OpenEnvironmentVariablesDialogAction extends AnAction {
         builder.addOkAction();
         builder.addCancelAction();
 
-        builder.showAndGet();
+        if(builder.showAndGet()) {
+            Map<String, String> environmentProperties = table.getEnvironmentVariables().stream()
+                    .collect(Collectors.toMap(var -> var.getName(), var -> var.getValue()));
+            MavenExecutorService.getInstance(event.getProject()).getSetting().setEnvironmentProperties(environmentProperties);
+        }
 
-        System.out.println(table.getEnvironmentVariables().size());
     }
 
 }
