@@ -94,7 +94,15 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
         this.project = project;
         this.toolWindow = toolWindow;
         this.toolWindowContent = new SimpleToolWindowPanel(true, true);
+
+        if(MavenExecutorService.getInstance(project).getSetting() == null) {
+            MavenExecutorService.getInstance(project).setSetting(new MavenExecutorSetting());
+        }
         this.runSetting = MavenExecutorService.getInstance(project).getSetting();
+
+        System.out.println("saved: " + MavenExecutorService.getInstance(project).getValue());
+        System.out.println("saved: " + runSetting.isAlwaysUpdateSnapshot());
+        MavenExecutorService.getInstance(project).setValue("ssss");
 
         createWindowToolbar();
 

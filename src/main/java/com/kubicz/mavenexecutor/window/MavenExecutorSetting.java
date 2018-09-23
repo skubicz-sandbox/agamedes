@@ -1,15 +1,21 @@
 package com.kubicz.mavenexecutor.window;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.intellij.util.xmlb.annotations.Attribute;
+import com.intellij.util.xmlb.annotations.Tag;
 import com.kubicz.mavenexecutor.model.ProjectToBuild;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+@Tag("setting")
 @ToString
-public class MavenExecutorSetting {
+@EqualsAndHashCode
+public class MavenExecutorSetting implements Cloneable, Serializable {
 
     private List<String> goals;
 
@@ -76,6 +82,8 @@ public class MavenExecutorSetting {
         return this;
     }
 
+
+    @Attribute("offlineMode")
     public boolean isOfflineMode() {
         return offlineMode;
     }

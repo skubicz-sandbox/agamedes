@@ -1,12 +1,24 @@
 package com.kubicz.mavenexecutor.window;
 
+import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.components.State;
 import com.intellij.openapi.project.Project;
+import com.intellij.util.xmlb.XmlSerializerUtil;
+import com.intellij.util.xmlb.annotations.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class MavenExecutorService {
+@State(name = "mavenExecutorSetting")
+public class MavenExecutorService implements PersistentStateComponent<MavenExecutorService> {
 
+    @Tag("setting")
     private MavenExecutorSetting setting;
+
+    private String value;
+
+    public MavenExecutorService() {
+    }
 
     public MavenExecutorService(Project project) {
         this.setting = new MavenExecutorSetting();
@@ -22,5 +34,24 @@ public class MavenExecutorService {
 
     public void setSetting(MavenExecutorSetting setting) {
         this.setting = setting;
+    }
+
+    @Nullable
+    @Override
+    public MavenExecutorService getState() {
+        return this;
+    }
+
+    @Override
+    public void loadState(MavenExecutorService state) {
+        XmlSerializerUtil.copyBean(state, this);
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
 }
