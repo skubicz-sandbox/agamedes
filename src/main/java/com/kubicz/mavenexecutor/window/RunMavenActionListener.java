@@ -10,13 +10,13 @@ import com.intellij.execution.impl.DefaultJavaProgramRunner;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.runners.ProgramRunner;
 import com.intellij.openapi.project.Project;
+import com.kubicz.mavenexecutor.model.MavenArtifact;
 import com.kubicz.mavenexecutor.model.Mavenize;
 import com.kubicz.mavenexecutor.model.ProjectRootNode;
 import myToolWindow.MyMavenRunConfiguration;
 import myToolWindow.MyMavenRunConfigurationType;
 import org.jetbrains.idea.maven.execution.MavenRunnerParameters;
 import org.jetbrains.idea.maven.execution.MavenRunnerSettings;
-import org.jetbrains.idea.maven.model.MavenId;
 import org.jetbrains.idea.maven.project.MavenGeneralSettings;
 
 import java.awt.event.ActionEvent;
@@ -48,7 +48,7 @@ public class RunMavenActionListener implements ActionListener {
             String module = "";
 
             if(!projectToBuild.buildEntireProject()) {
-                for (MavenId label : projectToBuild.getSelectedModule()) {
+                for (MavenArtifact label : projectToBuild.getSelectedModules()) {
                     module = module + label.getGroupId() + ":" + label.getArtifactId() + ",";
                 }
                 module = module.substring(0, module.lastIndexOf(','));

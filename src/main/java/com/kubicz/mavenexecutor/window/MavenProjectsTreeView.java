@@ -1,10 +1,9 @@
 package com.kubicz.mavenexecutor.window;
 
 import com.intellij.ui.*;
-import com.kubicz.mavenexecutor.model.Mavenize;
-import com.kubicz.mavenexecutor.model.ProjectModuleNode;
-import com.kubicz.mavenexecutor.model.ProjectRootNode;
+import com.kubicz.mavenexecutor.model.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.idea.maven.model.MavenId;
 import org.jetbrains.idea.maven.project.MavenProject;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
 
@@ -14,10 +13,8 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import java.awt.*;
 import java.awt.event.FocusListener;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 public class MavenProjectsTreeView {
 
@@ -40,14 +37,17 @@ public class MavenProjectsTreeView {
         }
     };
 
-    public MavenProjectsTreeView(@NotNull MavenProjectsManager projectsManager) {
+    public MavenProjectsTreeView(@NotNull MavenProjectsManager projectsManager, List<ProjectToBuild> selectedNodes) {
         CheckedTreeNode root = new CheckedTreeNode(null);
         for(MavenProject mavenProject : projectsManager.getRootProjects()) {
-            CheckedTreeNode rootProject = new CheckedTreeNode(ProjectRootNode.of(mavenProject.getDisplayName(), mavenProject.getMavenId(), false,
+            MavenArtifact rootMavenArtifact = toMavenArtifact(mavenProject.getMavenId());
+            CheckedTreeNode rootProject = new CheckedTreeNode(ProjectRootNode.of(mavenProject.getDisplayName(), rootMavenArtifact, false,
                     mavenProject.getDirectoryFile()));
-            rootProject.setChecked(false);
 
-            findChildren(mavenProject, projectsManager, "", rootProject);
+            Optional<ProjectToBuild> project = selectedNodes.stream().filter(projectToBuild -> projectToBuild.getMavenArtifact().equalsGroupAndArtifactId(rootMavenArtifact)).findFirst();
+            rootProject.setChecked(project.isPresent());
+
+            findChildren(mavenProject, projectsManager, "", rootProject, project.map(ProjectToBuild::getSelectedModules).orElse(Collections.emptyList()));
 
             root.add(rootProject);
 
@@ -65,9 +65,22 @@ public class MavenProjectsTreeView {
         });
     }
 
+    private boolean containsArtifact(MavenArtifact searched, List<MavenArtifact> listToFilter) {
+        if (listToFilter == null) {
+            return false;
+        }
+
+        return listToFilter.stream().anyMatch(mavenArtifact -> mavenArtifact.equalsGroupAndArtifactId(searched));
+    }
+
     public void addFocusLostListener(FocusListener focusListener) {
         this.tree.addFocusListener(focusListener);
     }
+
+    public void addCheckboxTreeListener(CheckboxTreeListener checkboxTreeListener) {
+        this.tree.addCheckboxTreeListener(checkboxTreeListener);
+    }
+
 
     public JTree getTreeComponent() {
         return tree;
@@ -88,6 +101,10 @@ public class MavenProjectsTreeView {
 
 
         return projectRootMap;
+    }
+
+    private MavenArtifact toMavenArtifact(MavenId mavenId) {
+        return new MavenArtifact(mavenId.getGroupId(), mavenId.getArtifactId(), mavenId.getVersion());
     }
 
     private List<CheckedTreeNode> findProjectRootNodes(final TreeModel model) {
@@ -162,17 +179,17 @@ public class MavenProjectsTreeView {
         return nodes;
     }
 
-    private void findChildren(MavenProject rootProject, MavenProjectsManager projectsManager, String offset, CheckedTreeNode root) {
+    private void findChildren(MavenProject rootProject, MavenProjectsManager projectsManager, String offset, CheckedTreeNode root, List<MavenArtifact> selectedNodes) {
         offset = offset + "  ";
 
         for(MavenProject mavenProject : projectsManager.findInheritors(rootProject)) {
             System.out.println(offset + mavenProject.getDisplayName());
-            // CheckedTreeNode projectNode = new CheckedTreeNode(new JLabel(mavenProject.getMavenId().getGroupId() + ":" + mavenProject
-            //         .getMavenId().getArtifactId()));
-            CheckedTreeNode projectNode = new CheckedTreeNode(ProjectModuleNode.of(mavenProject.getDisplayName(), mavenProject.getMavenId()));
-            projectNode.setChecked(false);
+            MavenArtifact nodeMavenArtifact = toMavenArtifact(mavenProject.getMavenId());
+
+            CheckedTreeNode projectNode = new CheckedTreeNode(ProjectModuleNode.of(mavenProject.getDisplayName(),nodeMavenArtifact));
+            projectNode.setChecked(containsArtifact(nodeMavenArtifact, selectedNodes));
             root.add(projectNode);
-            findChildren(mavenProject, projectsManager, offset, projectNode);
+            findChildren(mavenProject, projectsManager, offset, projectNode, selectedNodes);
         }
     }
 

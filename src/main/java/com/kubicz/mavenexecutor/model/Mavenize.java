@@ -1,11 +1,17 @@
 package com.kubicz.mavenexecutor.model;
 
-import org.jetbrains.idea.maven.model.MavenId;
-
 public interface Mavenize {
 
     String getDisplayName();
 
-    MavenId getMavenId();
+    MavenArtifact getMavenArtifact();
+
+   default boolean equalsGroupAndArtifactId(Mavenize mavenize) {
+       if(mavenize == null) {
+           return false;
+       }
+
+       return getMavenArtifact().getArtifactId().equals(mavenize.getMavenArtifact().getArtifactId()) && getMavenArtifact().getGroupId().equals(mavenize.getMavenArtifact().getGroupId());
+   }
 
 }

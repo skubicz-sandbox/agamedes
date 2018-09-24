@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.intellij.util.xmlb.annotations.Attribute;
 import com.intellij.util.xmlb.annotations.Tag;
@@ -35,6 +36,7 @@ public class MavenExecutorSetting implements Cloneable, Serializable {
 
     private boolean skipTests;
 
+    @Tag("projectsToBuild")
     private List<ProjectToBuild> projectsToBuild;
 
     public MavenExecutorSetting() {
@@ -48,6 +50,10 @@ public class MavenExecutorSetting implements Cloneable, Serializable {
 
     public List<String> getGoals() {
         return goals;
+    }
+
+    public String goalsAsText() {
+        return goals.stream().collect(Collectors.joining(" "));
     }
 
     public MavenExecutorSetting setGoals(final List<String> goals) {

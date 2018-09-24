@@ -16,7 +16,7 @@ public class ProjectRootNode implements Mavenize {
 
     private String displayName;
 
-    private MavenId mavenId;
+    private MavenArtifact mavenArtifact;
 
     @Setter
     private boolean selected;

@@ -14,6 +14,6 @@ public class ProjectModuleNode implements Mavenize {
 
     private String displayName;
 
-    private MavenId mavenId;
+    private MavenArtifact mavenArtifact;
 
 }

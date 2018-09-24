@@ -9,6 +9,8 @@ import com.intellij.util.xmlb.annotations.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.stream.Collectors;
+
 @State(name = "mavenExecutorSetting")
 public class MavenExecutorService implements PersistentStateComponent<MavenExecutorService> {
 
@@ -44,6 +46,8 @@ public class MavenExecutorService implements PersistentStateComponent<MavenExecu
 
     @Override
     public void loadState(MavenExecutorService state) {
+        // TODO why?
+        state.getSetting().setProjectsToBuild(state.getSetting().getProjectsToBuild().stream().filter(projectToBuild -> projectToBuild.getMavenArtifact() != null).collect(Collectors.toList()));
         XmlSerializerUtil.copyBean(state, this);
     }
 

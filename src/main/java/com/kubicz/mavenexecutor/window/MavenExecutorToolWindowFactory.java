@@ -1,38 +1,41 @@
 package com.kubicz.mavenexecutor.window;
 
 import com.google.common.collect.Lists;
-import com.intellij.codeInsight.hint.HintManager;
-import com.intellij.codeInsight.hint.HintManagerImpl;
-import com.intellij.codeInsight.hint.HintUtil;
-import com.intellij.codeInsight.hint.TooltipController;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.openapi.editor.event.DocumentEvent;
+import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.fileTypes.PlainTextFileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
-import com.intellij.openapi.wm.WindowManager;
 import com.intellij.ui.*;
-import com.intellij.ui.awt.RelativePoint;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 
+import com.kubicz.mavenexecutor.model.MavenArtifact;
+import com.kubicz.mavenexecutor.model.Mavenize;
+import com.kubicz.mavenexecutor.model.ProjectRootNode;
+import com.kubicz.mavenexecutor.model.ProjectToBuild;
 import myToolWindow.MavenPluginsCompletionProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.execution.MavenArgumentsCompletionProvider;
+import org.jetbrains.idea.maven.model.MavenId;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
@@ -124,14 +127,44 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
     }
 
 
+    private ProjectToBuild toProjectToBuild(Map.Entry<ProjectRootNode, java.util.List<Mavenize>> selectedProjectEntry) {
+        ProjectRootNode projectRootNode = selectedProjectEntry.getKey();
+        java.util.List<Mavenize> selectedModule = selectedProjectEntry.getValue();
+
+        ProjectToBuild projectToBuild;
+        if(projectRootNode.isSelected()) {
+            projectToBuild = new ProjectToBuild(projectRootNode.getDisplayName(), projectRootNode.getMavenArtifact(), projectRootNode.getProjectDirectory().getPath());
+        }
+        else {
+            List<MavenArtifact> modules = selectedModule.stream().map(Mavenize::getMavenArtifact).collect(Collectors.toList());
+            projectToBuild = new ProjectToBuild(projectRootNode.getDisplayName(), projectRootNode.getMavenArtifact(), projectRootNode.getProjectDirectory().getPath(), modules);
+        }
+
+        return projectToBuild;
+    }
+
     private void createWindowContent() {
         mainContent = new JPanel(new GridBagLayout());
         mainContent.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
 
         MavenProjectsManager projectsManager = MavenProjectsManager.getInstance(project);
 
-        projectsTreeView = new MavenProjectsTreeView(projectsManager);
-        projectsTreeView.addFocusLostListener(new MavenProjectsTreeViewListener(runSetting, projectsTreeView));
+        projectsTreeView = new MavenProjectsTreeView(projectsManager, runSetting.getProjectsToBuild());
+      //  projectsTreeView.addFocusLostListener(new MavenProjectsTreeViewListener(runSetting, projectsTreeView));
+        projectsTreeView.addCheckboxTreeListener(new CheckboxTreeAdapter() {
+            @Override
+            public void nodeStateChanged(@NotNull CheckedTreeNode node) {
+                Map<ProjectRootNode, List<Mavenize>> selectedProjects = projectsTreeView.findSelectedProjects();
+
+                List<ProjectToBuild> projectsToBuild = selectedProjects.entrySet().stream()
+                        .map(MavenExecutorToolWindowFactory.this::toProjectToBuild)
+                        .collect(Collectors.toList());
+
+                runSetting.setProjectsToBuild(projectsToBuild);
+
+                runMavenButton.setEnabled(canExecute());
+            }
+        });
 
         createFavoritePanel();
 
@@ -158,6 +191,7 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
         runMavenButton = new JButton();
         runMavenButton.setIcon(AllIcons.General.Run);
         runMavenButton.addActionListener(new RunMavenActionListener(project, projectsTreeView));
+        runMavenButton.setEnabled(canExecute());
 
         createGoalsSubPanel();
 
@@ -187,28 +221,24 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
         this.goalsComboBox.setFocusable(true);
         this.goalsEditor = editor.getEditorComponent();
 
-//        runMavenButton.addMouseListener(new MouseAdapter() {
-//            @Override
-//            public void mouseClicked(final MouseEvent e) {
-//                if(!canExecute()) {
-//                    HintManagerImpl
-//                            .getInstanceImpl()
-//                            .showHint(new JLabel("Enter goals and select projects."), new RelativePoint(e.getLocationOnScreen()),
-//                                    HintManager.HIDE_BY_ANY_KEY, 1500);
-//                }
-//            }
-//        });
-        goalsEditor.addFocusListener(new FocusAdapter() {
+        System.out.println(runSetting.goalsAsText());
+        goalsEditor.addDocumentListener(new DocumentListener() {
             @Override
-            public void focusLost(final FocusEvent e) {
+            public void documentChanged(DocumentEvent event) {
                 String goalsText = goalsComboBox.getEditor().getItem() + "";
-                if(!goalsText.isEmpty()) {
+                if(goalsText.isEmpty()) {
+                    runSetting.getGoals().clear();
+                }
+                else {
                     runSetting.setGoals(Lists.newArrayList(goalsText.split("\\s")));
                 }
+
+                runMavenButton.setEnabled(canExecute());
             }
         });
 
         (new MavenArgumentsCompletionProvider(project)).apply(this.goalsEditor);
+        goalsComboBox.getEditor().setItem(runSetting.goalsAsText());
 
         JLabel label = new JLabel("Goals");
 

@@ -1,7 +1,7 @@
 package com.kubicz.mavenexecutor.model;
 
+import com.intellij.util.xmlb.annotations.Tag;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.idea.maven.model.MavenId;
 
 import java.util.Collections;
 import java.util.List;
@@ -11,43 +11,64 @@ public class ProjectToBuild {
 
     private String displayName;
 
-    private MavenId mavenId;
+    private MavenArtifact mavenArtifact;
 
     private String projectDictionary;
 
-    private List<MavenId> selectedModule;
+    @Tag("selectedModules")
+    private List<MavenArtifact> selectedModules;
 
-    public ProjectToBuild(@NotNull String displayName, @NotNull MavenId mavenId,  String projectDictionary, List<MavenId> selectedModule) {
-        this.displayName = displayName;
-        this.mavenId = mavenId;
-        this.projectDictionary = projectDictionary;
-        this.selectedModule = Optional.ofNullable(selectedModule).orElse(Collections.emptyList());
+    protected ProjectToBuild() {
+
     }
 
-    public ProjectToBuild(@NotNull String displayName, @NotNull MavenId mavenId, String projectDictionary) {
+    public ProjectToBuild(@NotNull String displayName, @NotNull MavenArtifact mavenArtifact, String projectDictionary, List<MavenArtifact> selectedModules) {
         this.displayName = displayName;
-        this.mavenId = mavenId;
+        this.mavenArtifact = mavenArtifact;
         this.projectDictionary = projectDictionary;
-        this.selectedModule = Collections.emptyList();
+        this.selectedModules = Optional.ofNullable(selectedModules).orElse(Collections.emptyList());
+    }
+
+    public ProjectToBuild(@NotNull String displayName, @NotNull MavenArtifact mavenArtifact, String projectDictionary) {
+        this.displayName = displayName;
+        this.mavenArtifact = mavenArtifact;
+        this.projectDictionary = projectDictionary;
+        this.selectedModules = Collections.emptyList();
     }
 
     public boolean buildEntireProject() {
-        return selectedModule.isEmpty();
+        return selectedModules.isEmpty();
     }
 
     public String getDisplayName() {
         return this.displayName;
     }
 
-    public MavenId getMavenId() {
-        return this.mavenId;
+    public MavenArtifact getMavenArtifact() {
+        return this.mavenArtifact;
     }
 
-    public List<MavenId> getSelectedModule() {
-        return this.selectedModule;
+    public List<MavenArtifact> getSelectedModules() {
+        return this.selectedModules;
     }
 
     public String getProjectDictionary() {
         return projectDictionary;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public void setMavenArtifact(MavenArtifact mavenArtifact) {
+        this.mavenArtifact = mavenArtifact;
+    }
+
+    public void setProjectDictionary(String projectDictionary) {
+        this.projectDictionary = projectDictionary;
+    }
+
+    public void setSelectedModules(List<MavenArtifact> selectedModules) {
+        this.selectedModules = selectedModules;
     }
 }
