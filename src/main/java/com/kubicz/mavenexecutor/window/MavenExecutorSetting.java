@@ -26,6 +26,8 @@ public class MavenExecutorSetting implements Cloneable, Serializable {
 
     private List<String> jvmOptions;
 
+    private Integer threadCount;
+
     private Map<String, String> environmentProperties;
 
     private boolean trySkipPlugins;
@@ -77,6 +79,14 @@ public class MavenExecutorSetting implements Cloneable, Serializable {
     public MavenExecutorSetting setPluginsToSkip(final List<String> pluginsToSkip) {
         this.pluginsToSkip = pluginsToSkip;
         return this;
+    }
+
+    public Integer getThreadCount() {
+        return threadCount;
+    }
+
+    public void setThreadCount(Integer threadCount) {
+        this.threadCount = threadCount;
     }
 
     public boolean isTrySkipPlugins() {

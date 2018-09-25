@@ -45,9 +45,9 @@ public class MavenProjectsTreeView {
                     mavenProject.getDirectoryFile()));
 
             Optional<ProjectToBuild> project = selectedNodes.stream().filter(projectToBuild -> projectToBuild.getMavenArtifact().equalsGroupAndArtifactId(rootMavenArtifact)).findFirst();
-            rootProject.setChecked(project.isPresent());
+            rootProject.setChecked(project.map(ProjectToBuild::buildEntireProject).orElse(false));
 
-            findChildren(mavenProject, projectsManager, "", rootProject, project.map(ProjectToBuild::getSelectedModules).orElse(Collections.emptyList()));
+            findChildren(mavenProject, projectsManager, "", rootProject, project);
 
             root.add(rootProject);
 
@@ -179,7 +179,7 @@ public class MavenProjectsTreeView {
         return nodes;
     }
 
-    private void findChildren(MavenProject rootProject, MavenProjectsManager projectsManager, String offset, CheckedTreeNode root, List<MavenArtifact> selectedNodes) {
+    private void findChildren(MavenProject rootProject, MavenProjectsManager projectsManager, String offset, CheckedTreeNode root, Optional<ProjectToBuild> projectToBuild) {
         offset = offset + "  ";
 
         for(MavenProject mavenProject : projectsManager.findInheritors(rootProject)) {
@@ -187,9 +187,12 @@ public class MavenProjectsTreeView {
             MavenArtifact nodeMavenArtifact = toMavenArtifact(mavenProject.getMavenId());
 
             CheckedTreeNode projectNode = new CheckedTreeNode(ProjectModuleNode.of(mavenProject.getDisplayName(),nodeMavenArtifact));
-            projectNode.setChecked(containsArtifact(nodeMavenArtifact, selectedNodes));
+
+            projectToBuild.ifPresent(project -> {
+                projectNode.setChecked(project.buildEntireProject() ? true : containsArtifact(nodeMavenArtifact, project.getSelectedModules()));
+            });
             root.add(projectNode);
-            findChildren(mavenProject, projectsManager, offset, projectNode, selectedNodes);
+            findChildren(mavenProject, projectsManager, offset, projectNode, projectToBuild);
         }
     }
 

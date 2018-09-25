@@ -8,6 +8,7 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.fileTypes.PlainTextFileType;
+import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
@@ -15,9 +16,9 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.*;
 import com.intellij.ui.components.JBTextField;
+import com.intellij.ui.components.fields.IntegerField;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
-
 import com.kubicz.mavenexecutor.model.MavenArtifact;
 import com.kubicz.mavenexecutor.model.Mavenize;
 import com.kubicz.mavenexecutor.model.ProjectRootNode;
@@ -25,14 +26,14 @@ import com.kubicz.mavenexecutor.model.ProjectToBuild;
 import myToolWindow.MavenPluginsCompletionProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.execution.MavenArgumentsCompletionProvider;
-import org.jetbrains.idea.maven.model.MavenId;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
 
 import javax.swing.*;
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
 import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.util.Collection;
+import java.awt.event.*;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -74,7 +75,7 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
 
     private JLabel threadsLabel;
 
-    private JTextField threadsTextField;
+    private IntegerField threadsTextField;
 
     private JCheckBox skipPluginCheckBox;
 
@@ -288,7 +289,24 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
         threadsLabel = new JLabel("Threads:");
         innerPropertiesPanel.add(threadsLabel, bagConstraintsBuilder().anchorWest().fillNone().insetLeft(20).gridx(1).gridy(1).build());
 
-        threadsTextField = new JBTextField(2);
+        threadsTextField = new IntegerField(null, 0, 99);
+        threadsTextField.setColumns(2);
+        threadsTextField.setCanBeEmpty(true);
+        if(runSetting.getThreadCount() != null) {
+            threadsTextField.setValue(runSetting.getThreadCount());
+        }
+        threadsTextField.addCaretListener(new CaretListener() {
+            @Override
+            public void caretUpdate(CaretEvent event) {
+                try {
+                    threadsTextField.validateContent();
+                    runSetting.setThreadCount(threadsTextField.getValue());
+                }
+                catch (ConfigurationException e) {
+
+                }
+            }
+        });
         innerPropertiesPanel.add(threadsTextField, bagConstraintsBuilder().anchorEast().fillNone().gridx(1).gridy(1).build());
 
         innerPropertiesPanel.setMaximumSize(new Dimension(200, 50));
