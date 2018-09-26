@@ -15,7 +15,6 @@ import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.*;
-import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.components.fields.IntegerField;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
@@ -23,7 +22,6 @@ import com.kubicz.mavenexecutor.model.MavenArtifact;
 import com.kubicz.mavenexecutor.model.Mavenize;
 import com.kubicz.mavenexecutor.model.ProjectRootNode;
 import com.kubicz.mavenexecutor.model.ProjectToBuild;
-import myToolWindow.MavenPluginsCompletionProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.execution.MavenArgumentsCompletionProvider;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
@@ -31,9 +29,10 @@ import org.jetbrains.idea.maven.project.MavenProjectsManager;
 import javax.swing.*;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.*;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -55,7 +54,7 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
 
     private JPanel propertiesSubPanel;
 
-    private JPanel skipPluginSubPanel;
+    private JPanel optionalJvmOptionsSubPanel;
 
     private JPanel favoritePanel;
 
@@ -77,11 +76,11 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
 
     private IntegerField threadsTextField;
 
-    private JCheckBox skipPluginCheckBox;
+    private JCheckBox optionalJvmOptionsCheckBox;
 
-    private ComboBox skipPluginComboBox;
+    private ComboBox optionalJvmOptionsComboBox;
 
-    private EditorTextField skipPluginEditor;
+    private EditorTextField optionalJvmOptionsEditor;
 
     private MavenExecutorSetting runSetting;
 
@@ -202,7 +201,7 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
 
         configPanel.add(goalsSubPanel);
         configPanel.add(propertiesSubPanel);
-        configPanel.add(skipPluginSubPanel);
+        configPanel.add(optionalJvmOptionsSubPanel);
     }
 
     private boolean canExecute() {
@@ -270,16 +269,21 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
         JPanel innerPropertiesPanel = new JPanel(new GridBagLayout());
 
         offlineModeCheckBox = new JCheckBox("Offline");
+        offlineModeCheckBox.setSelected(runSetting.isOfflineMode());
+        offlineModeCheckBox.addActionListener(event -> {
+            runSetting.setOfflineMode(offlineModeCheckBox.isSelected());
+        });
         innerPropertiesPanel.add(offlineModeCheckBox, bagConstraintsBuilder().fillHorizontal().build());
 
         alwaysUpdateModeCheckBox = new JCheckBox("Update snapshots");
-
+        alwaysUpdateModeCheckBox.setSelected(runSetting.isAlwaysUpdateSnapshot());
         alwaysUpdateModeCheckBox.addActionListener(event -> {
             runSetting.setAlwaysUpdateSnapshot(alwaysUpdateModeCheckBox.isSelected());
         });
         innerPropertiesPanel.add(alwaysUpdateModeCheckBox, bagConstraintsBuilder().fillHorizontal().insetLeft(20).gridx(1).gridy(0).build());
 
         skipTestCheckBox = new JCheckBox("Skip tests");
+        skipTestCheckBox.setSelected(runSetting.isSkipTests());
         innerPropertiesPanel.add(skipTestCheckBox, bagConstraintsBuilder().fillHorizontal().gridx(0).gridy(1).build());
 
         skipTestCheckBox.addActionListener(event -> {
@@ -316,10 +320,13 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
 
         CustomCheckBoxList profiles = new CustomCheckBoxList();
         MavenProjectsManager projectsManager = MavenProjectsManager.getInstance(project);
-        profiles.setItems(Lists.newArrayList(projectsManager.getAvailableProfiles()), a -> a);
-        profiles.addFocusListener(new FocusAdapter() {
+        //profiles.setItems(Lists.newArrayList(projectsManager.getAvailableProfiles()), a -> a);
+        projectsManager.getAvailableProfiles().forEach(profile -> {
+            profiles.addItem(profile, profile, runSetting.getProfiles().contains(profile));
+        });
+        profiles.setCheckBoxListListener(new CheckBoxListListener() {
             @Override
-            public void focusLost(final FocusEvent e) {
+            public void checkBoxSelectionChanged(int index, boolean value) {
                 runSetting.setProfiles(profiles.getSelectedItemNames());
             }
         });
@@ -351,42 +358,50 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
     }
 
     private void createSkipPluginSubPanel() {
-        skipPluginSubPanel = new JPanel();
-        GroupLayout skipPluginLayout = new GroupLayout(skipPluginSubPanel);
-        skipPluginLayout.setAutoCreateGaps(true);
-        skipPluginLayout.setAutoCreateContainerGaps(true);
+        optionalJvmOptionsSubPanel = new JPanel();
+        GroupLayout optionalJvmOptionsLayout = new GroupLayout(optionalJvmOptionsSubPanel);
+        optionalJvmOptionsLayout.setAutoCreateGaps(true);
+        optionalJvmOptionsLayout.setAutoCreateContainerGaps(true);
+        optionalJvmOptionsSubPanel.setLayout(optionalJvmOptionsLayout);
 
-        skipPluginSubPanel.setLayout(skipPluginLayout);
+        optionalJvmOptionsCheckBox = new JCheckBox("JVM options:");
+        optionalJvmOptionsCheckBox.setSelected(runSetting.isUseOptionalJvmOptions());
 
-        skipPluginCheckBox = new JCheckBox("Try skip plugins:");
-
-        skipPluginComboBox = new ComboBox();
-        skipPluginComboBox.setLightWeightPopupEnabled(false);
-        EditorComboBoxEditor editor = new StringComboboxEditor(project, PlainTextFileType.INSTANCE, skipPluginComboBox);
-        skipPluginComboBox.setRenderer(new EditorComboBoxRenderer(editor));
-        skipPluginComboBox.setEditable(true);
-        skipPluginComboBox.setEditor(editor);
-        skipPluginComboBox.setFocusable(true);
-        skipPluginComboBox.setEnabled(skipPluginCheckBox.isSelected());
-        skipPluginEditor = editor.getEditorComponent();
-
-        skipPluginCheckBox.addActionListener(event -> {
-            skipPluginComboBox.setEnabled(skipPluginCheckBox.isSelected());
+        optionalJvmOptionsCheckBox.addActionListener(event -> {
+            optionalJvmOptionsComboBox.setEnabled(optionalJvmOptionsCheckBox.isSelected());
+            runSetting.setUseOptionalJvmOptions(optionalJvmOptionsCheckBox.isSelected());
 
         });
 
-        (new MavenPluginsCompletionProvider(project)).apply(skipPluginEditor);
+        optionalJvmOptionsComboBox = new ComboBox();
+        optionalJvmOptionsComboBox.setLightWeightPopupEnabled(false);
+        EditorComboBoxEditor editor = new StringComboboxEditor(project, PlainTextFileType.INSTANCE, optionalJvmOptionsComboBox);
+        optionalJvmOptionsComboBox.setRenderer(new EditorComboBoxRenderer(editor));
+        optionalJvmOptionsComboBox.setEditable(true);
+        optionalJvmOptionsComboBox.setEditor(editor);
+        optionalJvmOptionsComboBox.setFocusable(true);
+        optionalJvmOptionsComboBox.setEnabled(optionalJvmOptionsCheckBox.isSelected());
+        optionalJvmOptionsComboBox.getEditor().setItem(runSetting.optionalJvmOptionsAsText());
+        optionalJvmOptionsEditor = editor.getEditorComponent();
+//        (new MavenPluginsCompletionProvider(project)).apply(optionalJvmOptionsEditor);
 
-        skipPluginLayout.setHorizontalGroup(
-                skipPluginLayout.createSequentialGroup()
-                        .addComponent(skipPluginCheckBox)
-                        .addComponent(skipPluginComboBox)
+        optionalJvmOptionsEditor.addDocumentListener(new DocumentListener() {
+            @Override
+            public void documentChanged(DocumentEvent event) {
+                runSetting.setOptionalJvmOptions(Lists.newArrayList(optionalJvmOptionsComboBox.getEditor().getItem().toString().split("\\s")));
+            }
+        });
+
+        optionalJvmOptionsLayout.setHorizontalGroup(
+                optionalJvmOptionsLayout.createSequentialGroup()
+                        .addComponent(optionalJvmOptionsCheckBox)
+                        .addComponent(optionalJvmOptionsComboBox)
         );
-        skipPluginLayout.setVerticalGroup(
-                skipPluginLayout.createSequentialGroup()
-                        .addGroup(skipPluginLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                .addComponent(skipPluginCheckBox, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(skipPluginComboBox, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        optionalJvmOptionsLayout.setVerticalGroup(
+                optionalJvmOptionsLayout.createSequentialGroup()
+                        .addGroup(optionalJvmOptionsLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                .addComponent(optionalJvmOptionsCheckBox, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(optionalJvmOptionsComboBox, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         )
         );
     }

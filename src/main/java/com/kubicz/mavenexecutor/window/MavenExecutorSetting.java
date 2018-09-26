@@ -22,15 +22,15 @@ public class MavenExecutorSetting implements Cloneable, Serializable {
 
     private List<String> profiles;
 
-    private List<String> pluginsToSkip;
-
     private List<String> jvmOptions;
+
+    private List<String> optionalJvmOptions;
 
     private Integer threadCount;
 
     private Map<String, String> environmentProperties;
 
-    private boolean trySkipPlugins;
+    private boolean useOptionalJvmOptions;
 
     private boolean offlineMode;
 
@@ -44,9 +44,9 @@ public class MavenExecutorSetting implements Cloneable, Serializable {
     public MavenExecutorSetting() {
         goals = new ArrayList<>();
         profiles = new ArrayList<>();
-        pluginsToSkip = new ArrayList<>();
         projectsToBuild = new ArrayList<>();
         jvmOptions = new ArrayList<>();
+        optionalJvmOptions = new ArrayList<>();
         environmentProperties = new HashMap<>();
     }
 
@@ -56,6 +56,10 @@ public class MavenExecutorSetting implements Cloneable, Serializable {
 
     public String goalsAsText() {
         return goals.stream().collect(Collectors.joining(" "));
+    }
+
+    public String optionalJvmOptionsAsText() {
+        return optionalJvmOptions.stream().collect(Collectors.joining(" "));
     }
 
     public MavenExecutorSetting setGoals(final List<String> goals) {
@@ -72,15 +76,6 @@ public class MavenExecutorSetting implements Cloneable, Serializable {
         return this;
     }
 
-    public List<String> getPluginsToSkip() {
-        return pluginsToSkip;
-    }
-
-    public MavenExecutorSetting setPluginsToSkip(final List<String> pluginsToSkip) {
-        this.pluginsToSkip = pluginsToSkip;
-        return this;
-    }
-
     public Integer getThreadCount() {
         return threadCount;
     }
@@ -89,12 +84,12 @@ public class MavenExecutorSetting implements Cloneable, Serializable {
         this.threadCount = threadCount;
     }
 
-    public boolean isTrySkipPlugins() {
-        return trySkipPlugins;
+    public boolean isUseOptionalJvmOptions() {
+        return useOptionalJvmOptions;
     }
 
-    public MavenExecutorSetting setTrySkipPlugins(final boolean trySkipPlugins) {
-        this.trySkipPlugins = trySkipPlugins;
+    public MavenExecutorSetting setUseOptionalJvmOptions(final boolean useOptionalJvmOptions) {
+        this.useOptionalJvmOptions = useOptionalJvmOptions;
         return this;
     }
 
@@ -151,5 +146,13 @@ public class MavenExecutorSetting implements Cloneable, Serializable {
     public MavenExecutorSetting setEnvironmentProperties(final Map<String, String> environmentProperties) {
         this.environmentProperties = environmentProperties;
         return this;
+    }
+
+    public List<String> getOptionalJvmOptions() {
+        return optionalJvmOptions;
+    }
+
+    public void setOptionalJvmOptions(List<String> optionalJvmOptions) {
+        this.optionalJvmOptions = optionalJvmOptions;
     }
 }
