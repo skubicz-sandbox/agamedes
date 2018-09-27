@@ -1,6 +1,7 @@
 package com.kubicz.mavenexecutor.window;
 
 import com.google.common.collect.Lists;
+import com.intellij.ProjectTopics;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
@@ -10,6 +11,8 @@ import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.fileTypes.PlainTextFileType;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ModuleRootEvent;
+import com.intellij.openapi.roots.ModuleRootListener;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.wm.ToolWindow;
@@ -82,6 +85,8 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
 
     private EditorTextField optionalJvmOptionsEditor;
 
+    private CustomCheckBoxList profiles;
+
     private MavenExecutorSetting runSetting;
 
     public MavenExecutorToolWindowFactory() {
@@ -97,6 +102,21 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
         this.project = project;
         this.toolWindow = toolWindow;
         this.toolWindowContent = new SimpleToolWindowPanel(true, true);
+        project.getMessageBus().connect()
+                .subscribe(ProjectTopics.PROJECT_ROOTS, new ModuleRootListener() {
+                    @Override
+                    public void rootsChanged(final ModuleRootEvent event) {
+                        MavenExecutorToolWindowFactory.this.project = (Project)event.getSource();
+
+                        MavenProjectsManager projectsManager = MavenProjectsManager.getInstance(project);
+
+                        profiles.clear();
+
+                        projectsManager.getAvailableProfiles().forEach(profile -> {
+                            profiles.addItem(profile, profile, runSetting.getProfiles().contains(profile));
+                        });
+                    }
+                });
 
         if(MavenExecutorService.getInstance(project).getSetting() == null) {
             MavenExecutorService.getInstance(project).setSetting(new MavenExecutorSetting());
@@ -320,7 +340,7 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
         JPanel emptyPanel = new JPanel();
 
 
-        CustomCheckBoxList profiles = new CustomCheckBoxList();
+        this.profiles = new CustomCheckBoxList();
         MavenProjectsManager projectsManager = MavenProjectsManager.getInstance(project);
         //profiles.setItems(Lists.newArrayList(projectsManager.getAvailableProfiles()), a -> a);
         projectsManager.getAvailableProfiles().forEach(profile -> {
