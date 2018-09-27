@@ -1,13 +1,7 @@
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.jetbrains.idea.maven.project.MavenProjectsManager;
-import org.jetbrains.idea.maven.utils.actions.MavenActionUtil;
-
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.kubicz.mavenexecutor.window.MavenExecutorService;
-
+import com.kubicz.mavenexecutor.window.MavenExecutorSetting;
 import myToolWindow.JvmOptionsDialog;
 
 
@@ -18,12 +12,13 @@ public class OpenJvmOptionsDialogAction extends AnAction {
     }
 
     public void actionPerformed(AnActionEvent event) {
-        MavenProjectsManager projectsManager = MavenActionUtil.getProjectsManager(event.getDataContext());
+        MavenExecutorSetting setting = MavenExecutorService.getInstance(event.getProject()).getSetting();
 
         JvmOptionsDialog jvmOptionsDialog = new JvmOptionsDialog(event.getProject());
+        jvmOptionsDialog.setJvmOptions(setting.getJvmOptions());
 
         if(jvmOptionsDialog.showAndGet()) {
-            MavenExecutorService.getInstance(event.getProject()).getSetting().setJvmOptions(jvmOptionsDialog.getJvmOptions());
+            setting.setJvmOptions(jvmOptionsDialog.getJvmOptions());
         }
     }
 

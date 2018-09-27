@@ -23,6 +23,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class RunMavenActionListener implements ActionListener {
 
@@ -42,18 +43,7 @@ public class RunMavenActionListener implements ActionListener {
 
         MyMavenRunConfigurationType runConfigurationType = ConfigurationTypeUtil.findConfigurationType(MyMavenRunConfigurationType.class);
 
-        Map<ProjectRootNode, List<Mavenize>> projectRootMap = projectsTree.findSelectedProjects();
-
         runSetting.getProjectsToBuild().forEach(projectToBuild -> {
-            String module = "";
-
-            if(!projectToBuild.buildEntireProject()) {
-                for (MavenArtifact label : projectToBuild.getSelectedModules()) {
-                    module = module + label.getGroupId() + ":" + label.getArtifactId() + ",";
-                }
-                module = module.substring(0, module.lastIndexOf(','));
-            }
-
             final RunnerAndConfigurationSettings settings = RunManagerEx.getInstanceEx(project)
                     .createRunConfiguration(projectToBuild.getDisplayName(), runConfigurationType.getConfigurationFactories()[0]);
 
@@ -61,25 +51,39 @@ public class RunMavenActionListener implements ActionListener {
 
             MyMavenRunConfiguration runConfiguration = (MyMavenRunConfiguration) settings.getConfiguration();
             MavenRunnerSettings mavenRunnerSettings = new MavenRunnerSettings();
-     //       mavenRunnerSettings.setVmOptions(runSetting.getJvmOptions().get(0));
-            mavenRunnerSettings.setSkipTests(runSetting.isSkipTests());
-            //        Map<String, String> mavenProperties =  new HashMap<>();
-            runConfiguration.mavenProperties.clear();
-            if(!module.isEmpty()) {
-                runConfiguration.mavenProperties.put("-pl", module);
-            }
 
-            //   mavenRunnerSettings.setVmOptions("-pl " + module);
+            String jvmOptions = runSetting.jvmOptionsAsText();
+            if(runSetting.isUseOptionalJvmOptions() && !runSetting.getOptionalJvmOptions().isEmpty()) {
+                jvmOptions = jvmOptions + " " + runSetting.optionalJvmOptionsAsText();
+            }
+            mavenRunnerSettings.setVmOptions(jvmOptions);
+
+            mavenRunnerSettings.setEnvironmentProperties(runSetting.getEnvironmentProperties());
+
+            mavenRunnerSettings.setSkipTests(runSetting.isSkipTests());
+
             runConfiguration.setRunnerSettings(mavenRunnerSettings);
 
+            runConfiguration.mavenProperties.clear();
+            if(!projectToBuild.buildEntireProject()) {
+                runConfiguration.mavenProperties.put("-pl", projectToBuild.selectedModulesAsText());
+            }
+
+
             MavenGeneralSettings mavenGeneralSettings = new MavenGeneralSettings();
+            mavenGeneralSettings.setWorkOffline(runSetting.isOfflineMode());
             mavenGeneralSettings.setAlwaysUpdateSnapshots(runSetting.isAlwaysUpdateSnapshot());
+            if(runSetting.getThreadCount() != null && runSetting.getThreadCount() > 0) {
+                mavenGeneralSettings.setThreads(runSetting.getThreadCount().toString());
+            }
 
             runConfiguration.setGeneralSettings(mavenGeneralSettings);
-            //parametersList.add("-pl", "app-api");
+
             MavenRunnerParameters mavenRunnerParameters = new MavenRunnerParameters();
+
             mavenRunnerParameters.setWorkingDirPath(projectToBuild.getProjectDictionary());
             mavenRunnerParameters.setGoals(runSetting.getGoals());
+            mavenRunnerParameters.setProfilesMap(runSetting.getProfiles().stream().collect(Collectors.toMap(profile -> profile, profile -> true)));
 
             runConfiguration.setRunnerParameters(mavenRunnerParameters);
 

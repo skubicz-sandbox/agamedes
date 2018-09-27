@@ -304,10 +304,12 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
             public void caretUpdate(CaretEvent event) {
                 try {
                     threadsTextField.validateContent();
+                    System.out.println(threadsTextField.getValue());
                     runSetting.setThreadCount(threadsTextField.getValue());
                 }
                 catch (ConfigurationException e) {
-
+                    System.out.println("null");
+                    runSetting.setThreadCount(null);
                 }
             }
         });

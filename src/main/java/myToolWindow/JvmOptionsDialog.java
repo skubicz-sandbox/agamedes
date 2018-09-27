@@ -1,6 +1,7 @@
 package myToolWindow;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -29,6 +30,15 @@ public class JvmOptionsDialog extends DialogWrapper {
 
     public List<String> getJvmOptions() {
         return Lists.newArrayList(jvmOptionTextArea.getText().split("\n"));
+    }
+
+    public void setJvmOptions(List<String> jmOptions) {
+        if(jmOptions == null) {
+            jvmOptionTextArea.setText("");
+        }
+        else {
+            jvmOptionTextArea.setText(jmOptions.stream().collect(Collectors.joining("\n")));
+        }
     }
 
     @Nullable

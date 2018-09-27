@@ -25,6 +25,10 @@ public class MavenArtifact {
         return getArtifactId().equals(mavenize.getArtifactId()) && getGroupId().equals(mavenize.getGroupId());
     }
 
+    public String groupIdAndArtifactIdAsText() {
+        return groupId + ":" + artifactId;
+    }
+
     public String getGroupId() {
         return groupId;
     }

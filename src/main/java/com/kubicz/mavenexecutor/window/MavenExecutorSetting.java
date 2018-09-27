@@ -55,12 +55,17 @@ public class MavenExecutorSetting implements Cloneable, Serializable {
     }
 
     public String goalsAsText() {
-        return goals.stream().collect(Collectors.joining(" "));
+        return ListTextMapper.listAsText(goals, "");
     }
 
     public String optionalJvmOptionsAsText() {
-        return optionalJvmOptions.stream().collect(Collectors.joining(" "));
+        return ListTextMapper.listAsText(optionalJvmOptions, "");
     }
+
+    public String jvmOptionsAsText() {
+        return ListTextMapper.listAsText(jvmOptions, "");
+    }
+
 
     public MavenExecutorSetting setGoals(final List<String> goals) {
         this.goals = goals;

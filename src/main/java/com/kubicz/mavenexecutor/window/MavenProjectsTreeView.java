@@ -54,6 +54,11 @@ public class MavenProjectsTreeView {
         }
 
         this.tree = new CheckboxTree(renderer, root);
+
+        for(int i = 0; i < this.tree.getRowCount(); ++i) {
+            this.tree.expandRow(i);
+        }
+
         this.tree.addCheckboxTreeListener(new CheckboxTreeAdapter() {
             @Override
             public void nodeStateChanged(@NotNull CheckedTreeNode node) {

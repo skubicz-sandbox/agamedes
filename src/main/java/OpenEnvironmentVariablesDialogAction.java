@@ -1,14 +1,15 @@
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import com.google.common.collect.Lists;
-import com.intellij.execution.ExecutionBundle;
 import com.intellij.execution.util.EnvVariablesTable;
 import com.intellij.execution.util.EnvironmentVariable;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.DialogBuilder;
 import com.kubicz.mavenexecutor.window.MavenExecutorService;
+import com.kubicz.mavenexecutor.window.MavenExecutorSetting;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 public class OpenEnvironmentVariablesDialogAction extends AnAction {
@@ -18,22 +19,38 @@ public class OpenEnvironmentVariablesDialogAction extends AnAction {
     }
 
     public void actionPerformed(AnActionEvent event) {
-        EnvironmentVariable variable = new EnvironmentVariable("name2", "value2", false);
-        EnvVariablesTable table = new EnvVariablesTable();
-        table.setValues(Lists.newArrayList(variable));
-        table.getActionsPanel().setVisible(true);
+        MavenExecutorSetting setting = MavenExecutorService.getInstance(event.getProject()).getSetting();
+
         DialogBuilder builder = new DialogBuilder();
         builder.setTitle("Configure Environment Variables");
-        builder.centerPanel(table.getComponent());
         builder.addOkAction();
         builder.addCancelAction();
 
-        if(builder.showAndGet()) {
-            Map<String, String> environmentProperties = table.getEnvironmentVariables().stream()
-                    .collect(Collectors.toMap(var -> var.getName(), var -> var.getValue()));
-            MavenExecutorService.getInstance(event.getProject()).getSetting().setEnvironmentProperties(environmentProperties);
+        EnvVariablesTable table = new EnvVariablesTable();
+        table.setValues(toEnvVariables(setting.getEnvironmentProperties()));
+        table.getActionsPanel().setVisible(true);
+        builder.centerPanel(table.getComponent());
+
+        if (builder.showAndGet()) {
+            setting.setEnvironmentProperties(toEnvironmentPropertiesMap(table.getEnvironmentVariables()));
         }
 
+    }
+
+    private List<EnvironmentVariable> toEnvVariables(Map<String, String> environmentProperties) {
+        if (environmentProperties == null) {
+            return new ArrayList<>();
+        }
+
+        return environmentProperties.entrySet().stream()
+                .map(envEntry -> new EnvironmentVariable(envEntry.getKey(), envEntry.getValue(), false))
+                .collect(Collectors.toList());
+    }
+
+
+    private Map<String, String> toEnvironmentPropertiesMap(List<EnvironmentVariable> environmentProperties) {
+        return environmentProperties.stream()
+                .collect(Collectors.toMap(var -> var.getName(), var -> var.getValue()));
     }
 
 }

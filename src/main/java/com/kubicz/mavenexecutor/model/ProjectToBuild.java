@@ -1,6 +1,7 @@
 package com.kubicz.mavenexecutor.model;
 
 import com.intellij.util.xmlb.annotations.Tag;
+import com.kubicz.mavenexecutor.window.ListTextMapper;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -38,6 +39,10 @@ public class ProjectToBuild {
 
     public boolean buildEntireProject() {
         return selectedModules.isEmpty();
+    }
+
+    public String selectedModulesAsText() {
+        return ListTextMapper.streamAsText(this.selectedModules.stream().map(MavenArtifact::groupIdAndArtifactIdAsText), ",");
     }
 
     public String getDisplayName() {
