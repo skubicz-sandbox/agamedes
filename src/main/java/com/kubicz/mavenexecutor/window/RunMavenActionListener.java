@@ -18,9 +18,12 @@ import myToolWindow.MyMavenRunConfigurationType;
 import org.jetbrains.idea.maven.execution.MavenRunnerParameters;
 import org.jetbrains.idea.maven.execution.MavenRunnerSettings;
 import org.jetbrains.idea.maven.project.MavenGeneralSettings;
+import org.jetbrains.idea.maven.project.MavenProjectsManager;
+import org.jetbrains.idea.maven.utils.MavenUtil;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -77,6 +80,9 @@ public class RunMavenActionListener implements ActionListener {
                 mavenGeneralSettings.setThreads(runSetting.getThreadCount().toString());
             }
 
+            MavenProjectsManager projectsManager = MavenProjectsManager.getInstance(project);
+            File mavenHome = MavenUtil.resolveMavenHomeDirectory(projectsManager.getGeneralSettings().getMavenHome());
+            mavenGeneralSettings.setMavenHome(mavenHome.getPath());
             runConfiguration.setGeneralSettings(mavenGeneralSettings);
 
             MavenRunnerParameters mavenRunnerParameters = new MavenRunnerParameters();

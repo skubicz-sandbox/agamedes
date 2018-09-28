@@ -1,5 +1,25 @@
 package com.kubicz.mavenexecutor.window;
 
+import java.awt.Dimension;
+import java.awt.GridBagLayout;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.swing.BoxLayout;
+import javax.swing.GroupLayout;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.idea.maven.execution.MavenArgumentsCompletionProvider;
+import org.jetbrains.idea.maven.project.MavenProjectsManager;
+
 import com.google.common.collect.Lists;
 import com.intellij.ProjectTopics;
 import com.intellij.icons.AllIcons;
@@ -10,6 +30,7 @@ import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.fileTypes.PlainTextFileType;
 import com.intellij.openapi.options.ConfigurationException;
+import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootEvent;
 import com.intellij.openapi.roots.ModuleRootListener;
@@ -17,7 +38,14 @@ import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
-import com.intellij.ui.*;
+import com.intellij.ui.CheckBoxListListener;
+import com.intellij.ui.CheckboxTreeAdapter;
+import com.intellij.ui.CheckedTreeNode;
+import com.intellij.ui.EditorComboBoxEditor;
+import com.intellij.ui.EditorComboBoxRenderer;
+import com.intellij.ui.EditorTextField;
+import com.intellij.ui.ScrollPaneFactory;
+import com.intellij.ui.StringComboboxEditor;
 import com.intellij.ui.components.fields.IntegerField;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
@@ -25,23 +53,9 @@ import com.kubicz.mavenexecutor.model.MavenArtifact;
 import com.kubicz.mavenexecutor.model.Mavenize;
 import com.kubicz.mavenexecutor.model.ProjectRootNode;
 import com.kubicz.mavenexecutor.model.ProjectToBuild;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.idea.maven.execution.MavenArgumentsCompletionProvider;
-import org.jetbrains.idea.maven.project.MavenProjectsManager;
-
-import javax.swing.*;
-import javax.swing.event.CaretEvent;
-import javax.swing.event.CaretListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import java.awt.*;
-import java.awt.event.*;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 
-public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
+public class MavenExecutorToolWindowFactory implements ToolWindowFactory, DumbAware {
 
     private Project project;
 
@@ -102,6 +116,7 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
         this.project = project;
         this.toolWindow = toolWindow;
         this.toolWindowContent = new SimpleToolWindowPanel(true, true);
+
         project.getMessageBus().connect()
                 .subscribe(ProjectTopics.PROJECT_ROOTS, new ModuleRootListener() {
                     @Override
@@ -133,7 +148,7 @@ public class MavenExecutorToolWindowFactory implements ToolWindowFactory {
 
         ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
         Content content = contentFactory.createContent(toolWindowContent, "", false);
-        toolWindow.getContentManager().addContent(content);
+        this.toolWindow.getContentManager().addContent(content);
     }
 
     private void createWindowToolbar() {
