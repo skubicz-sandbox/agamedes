@@ -3,6 +3,7 @@ package com.kubicz.mavenexecutor.window;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
+import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.intellij.util.xmlb.annotations.Tag;
@@ -11,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.stream.Collectors;
 
-@State(name = "mavenExecutorSetting")
+@State(name = "mavenExecutorSetting", storages = @Storage("mavenExecutorSetting.xml"))
 public class MavenExecutorService implements PersistentStateComponent<MavenExecutorService> {
 
     @Tag("setting")
