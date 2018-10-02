@@ -354,8 +354,8 @@ public class MavenExecutorToolWindow {
         });
 
         JScrollPane profilesScrollPane = ScrollPaneFactory.createScrollPane(profiles);
-        profilesScrollPane.setMaximumSize(new Dimension(150, 80));
-        profilesScrollPane.setMinimumSize(new Dimension(150, 80));
+        profilesScrollPane.setMaximumSize(new Dimension(1000, 80));
+        profilesScrollPane.setMinimumSize(new Dimension(0, 80));
 
         GroupLayout propertiesGroupLayout = new GroupLayout(propertiesSubPanel);
         propertiesGroupLayout.setAutoCreateGaps(true);
@@ -366,14 +366,14 @@ public class MavenExecutorToolWindow {
         propertiesGroupLayout.setHorizontalGroup(
                 propertiesGroupLayout.createSequentialGroup()
                         .addComponent(innerPropertiesPanel)
-                        .addComponent(emptyPanel)
+                  //      .addComponent(emptyPanel)
                         .addComponent(profilesScrollPane)
         );
         propertiesGroupLayout.setVerticalGroup(
                 propertiesGroupLayout.createSequentialGroup()
                         .addGroup(propertiesGroupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                 .addComponent(innerPropertiesPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(emptyPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                           //     .addComponent(emptyPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(profilesScrollPane)
                         )
         );
