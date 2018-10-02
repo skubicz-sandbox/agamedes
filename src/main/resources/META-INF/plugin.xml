@@ -27,6 +27,8 @@
 
         <toolWindow id="Maven Executor" secondary="true" icon="/myToolWindow/plus.png" anchor="right"
             factoryClass="com.kubicz.mavenexecutor.window.MavenExecutorToolWindowFactory" />
+
+        <projectService serviceImplementation="com.kubicz.mavenexecutor.window.MavenExecutorToolWindow"/>
         <projectService serviceImplementation="com.kubicz.mavenexecutor.window.MavenExecutorService"/>
     </extensions>
 
