@@ -33,6 +33,12 @@
     </extensions>
 
     <actions>
+        <group id="EasyMavenBuilder.FavoriteItemContextMenu">
+            <action id="EasyMavenBuilder.RemoveFavorite"
+                    class="RemoveFavoriteAction"
+                    text="Remove" />
+        </group>
+
         <group id="EasyMavenBuilder.ActionsToolbar">
             <action id="EasyMavenBuilder.MavenReimport"
                 icon="AllIcons.Actions.Refresh"
@@ -55,6 +61,12 @@
                 class="OpenMavenSettingsAction" text="Maven Settings"
                 description="Edit Maven integration settings for the current project"
                 icon="AllIcons.General.ProjectSettings">
+            </action>
+
+            <action id="EasyMavenBuilder.SaveSettings"
+                    class="SaveSettingsAction" text="Save Settings"
+                    description="Edit Maven integration settings for the current project"
+                    icon="AllIcons.Actions.Menu_saveall">
             </action>
         </group>
 

@@ -31,7 +31,7 @@
 //
 //    private ProjectToBuild toProjectToBuild(Map.Entry<ProjectRootNode, List<Mavenize>> selectedProjectEntry) {
 //        ProjectRootNode projectRootNode = selectedProjectEntry.getKey();
-//        List<Mavenize> selectedModule = selectedProjectEntry.getValue();
+//        List<Mavenize> selectedModule = selectedProjectEntry.getLastLoaded();
 //
 //        ProjectToBuild projectToBuild;
 //        if(projectRootNode.isSelected()) {

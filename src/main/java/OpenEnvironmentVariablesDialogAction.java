@@ -19,7 +19,7 @@ public class OpenEnvironmentVariablesDialogAction extends AnAction {
     }
 
     public void actionPerformed(AnActionEvent event) {
-        MavenExecutorSetting setting = MavenExecutorService.getInstance(event.getProject()).getSetting();
+        MavenExecutorSetting setting = MavenExecutorService.getInstance(event.getProject()).getCurrentSettings();
 
         DialogBuilder builder = new DialogBuilder();
         builder.setTitle("Configure Environment Variables");

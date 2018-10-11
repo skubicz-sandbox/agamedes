@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.intellij.ProjectTopics;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.ActionPopupMenu;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.components.ServiceManager;
@@ -21,6 +22,7 @@ import com.intellij.ui.*;
 import com.intellij.ui.components.fields.IntegerField;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
+import com.intellij.util.ui.JBUI;
 import com.kubicz.mavenexecutor.model.MavenArtifact;
 import com.kubicz.mavenexecutor.model.Mavenize;
 import com.kubicz.mavenexecutor.model.ProjectRootNode;
@@ -30,9 +32,14 @@ import org.jetbrains.idea.maven.execution.MavenArgumentsCompletionProvider;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
 
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -57,6 +64,8 @@ public class MavenExecutorToolWindow {
     private JPanel optionalJvmOptionsSubPanel;
 
     private JPanel favoritePanel;
+
+    private JButton defaultSettingsButton;
 
     private MavenProjectsTreeView projectsTreeView;
 
@@ -84,7 +93,7 @@ public class MavenExecutorToolWindow {
 
     private CustomCheckBoxList profiles;
 
-    private MavenExecutorSetting runSetting;
+    private MavenExecutorService settingsService;
 
     public MavenExecutorToolWindow(Project project) {
         this.project = project;
@@ -111,19 +120,16 @@ public class MavenExecutorToolWindow {
                         profiles.clear();
 
                         projectsManager.getAvailableProfiles().forEach(profile -> {
-                            profiles.addItem(profile, profile, runSetting.getProfiles().contains(profile));
+                            profiles.addItem(profile, profile, settingsService.getCurrentSettings().getProfiles().contains(profile));
                         });
                     }
                 });
 
-        if(MavenExecutorService.getInstance(project).getSetting() == null) {
-            MavenExecutorService.getInstance(project).setSetting(new MavenExecutorSetting());
-        }
-        this.runSetting = MavenExecutorService.getInstance(project).getSetting();
+        settingsService = MavenExecutorService.getInstance(project);
 
-        System.out.println("saved: " + MavenExecutorService.getInstance(project).getValue());
-        System.out.println("saved: " + runSetting.isAlwaysUpdateSnapshot());
-        MavenExecutorService.getInstance(project).setValue("ssss");
+        if(settingsService.getCurrentSettings() == null) {
+            settingsService.setCurrentSettings(new MavenExecutorSetting());
+        }
 
         createWindowToolbar();
 
@@ -167,7 +173,7 @@ public class MavenExecutorToolWindow {
 
         MavenProjectsManager projectsManager = MavenProjectsManager.getInstance(project);
 
-        projectsTreeView = new MavenProjectsTreeView(projectsManager, runSetting.getProjectsToBuild());
+        projectsTreeView = new MavenProjectsTreeView(projectsManager, settingsService.getCurrentSettings().getProjectsToBuild());
       //  projectsTreeView.addFocusLostListener(new MavenProjectsTreeViewListener(runSetting, projectsTreeView));
         projectsTreeView.addCheckboxTreeListener(new CheckboxTreeAdapter() {
             @Override
@@ -178,7 +184,7 @@ public class MavenExecutorToolWindow {
                         .map(MavenExecutorToolWindow.this::toProjectToBuild)
                         .collect(Collectors.toList());
 
-                runSetting.setProjectsToBuild(projectsToBuild);
+                settingsService.getCurrentSettings().setProjectsToBuild(projectsToBuild);
 
                 runMavenButton.setEnabled(canExecute());
             }
@@ -198,8 +204,72 @@ public class MavenExecutorToolWindow {
     }
 
     private void createFavoritePanel() {
-        favoritePanel = new JPanel();
-        favoritePanel.add(new JLabel("All"));
+        if(favoritePanel == null) {
+            favoritePanel = new JPanel();
+        }
+        else {
+            favoritePanel.removeAll();
+        }
+        favoritePanel.setLayout(new BoxLayout(favoritePanel, BoxLayout.PAGE_AXIS));
+
+        MavenExecutorService settingsService = MavenExecutorService.getInstance(project);
+
+        defaultSettingsButton = new JButton("DEFAULT");
+        defaultSettingsButton.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1), BorderFactory.createEmptyBorder(3, 5, 3, 5)));
+        defaultSettingsButton.setMaximumSize(new Dimension(Short.MAX_VALUE, Double.valueOf(defaultSettingsButton.getMaximumSize().getHeight()).shortValue()));
+
+        defaultSettingsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                settingsService.loadSettings(defaultSettingsButton.getText());
+
+                updateAll();
+            }
+        });
+
+        favoritePanel.add(defaultSettingsButton);
+
+        JLabel favoriteLabel = new JLabel("Favorite:", null, SwingConstants.CENTER);
+        favoriteLabel.setMaximumSize(new Dimension(Short.MAX_VALUE, Double.valueOf(favoriteLabel.getMaximumSize().getHeight()).shortValue()));
+        favoritePanel.add(favoriteLabel);
+
+        settingsService.getFavoriteSettingsNames().forEach(settingName -> {
+            JButton button = new JButton(settingName);
+            button.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1), BorderFactory.createEmptyBorder(3, 5, 3, 5)));
+            button.setMaximumSize(new Dimension(Short.MAX_VALUE, Double.valueOf(button.getMaximumSize().getHeight()).shortValue()));
+
+
+            button.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    JButton source = (JButton)e.getSource();
+
+                    settingsService.loadSettings(button.getText());
+
+                    System.out.println(settingsService.getCurrentSettings());
+
+                    updateAll();
+                }
+            });
+
+            button.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    if(SwingUtilities.isRightMouseButton(e)) {
+                        final ActionManager actionManager = ActionManager.getInstance();
+
+                        JButton source = (JButton)e.getSource();
+                        ActionPopupMenu menu = actionManager.createActionPopupMenu("EasyMavenBuilderPanel", (DefaultActionGroup) actionManager
+                                .getAction("EasyMavenBuilder.FavoriteItemContextMenu"));
+                        menu.getComponent().show(source, JBUI.scale(-10), source.getHeight() + JBUI.scale(2));
+                    }
+                }
+            });
+
+            favoritePanel.add(button);
+        });
+
+        favoritePanel.repaint();
     }
 
     private void createConfigPanel() {
@@ -223,13 +293,12 @@ public class MavenExecutorToolWindow {
     }
 
     private boolean canExecute() {
-        return !runSetting.getGoals().isEmpty() && !runSetting.getProjectsToBuild().isEmpty();
+        return !settingsService.getCurrentSettings().getGoals().isEmpty() && !settingsService.getCurrentSettings().getProjectsToBuild().isEmpty();
     }
 
     private void createGoalsSubPanel() {
         String[] history = {""};
         this.goalsComboBox = new ComboBox(history);
-
 
         this.goalsComboBox.setLightWeightPopupEnabled(false);
         EditorComboBoxEditor editor = new StringComboboxEditor(project, PlainTextFileType.INSTANCE, this.goalsComboBox);
@@ -239,16 +308,16 @@ public class MavenExecutorToolWindow {
         this.goalsComboBox.setFocusable(true);
         this.goalsEditor = editor.getEditorComponent();
 
-        System.out.println(runSetting.goalsAsText());
+        System.out.println(settingsService.getCurrentSettings().goalsAsText());
         goalsEditor.addDocumentListener(new DocumentListener() {
             @Override
             public void documentChanged(DocumentEvent event) {
                 String goalsText = goalsComboBox.getEditor().getItem() + "";
                 if(goalsText.isEmpty()) {
-                    runSetting.getGoals().clear();
+                    settingsService.getCurrentSettings().getGoals().clear();
                 }
                 else {
-                    runSetting.setGoals(Lists.newArrayList(goalsText.split("\\s")));
+                    settingsService.getCurrentSettings().setGoals(Lists.newArrayList(goalsText.split("\\s")));
                 }
 
                 runMavenButton.setEnabled(canExecute());
@@ -256,7 +325,7 @@ public class MavenExecutorToolWindow {
         });
 
         (new MavenArgumentsCompletionProvider(project)).apply(this.goalsEditor);
-        goalsComboBox.getEditor().setItem(runSetting.goalsAsText());
+        goalsComboBox.getEditor().setItem(settingsService.getCurrentSettings().goalsAsText());
 
         JLabel label = new JLabel("Goals");
 
@@ -287,27 +356,27 @@ public class MavenExecutorToolWindow {
         JPanel innerPropertiesPanel = new JPanel(new GridBagLayout());
 
         offlineModeCheckBox = new JCheckBox("Offline");
-        offlineModeCheckBox.setSelected(runSetting.isOfflineMode());
+        offlineModeCheckBox.setSelected(settingsService.getCurrentSettings().isOfflineMode());
         offlineModeCheckBox.addActionListener(event -> {
-            MavenExecutorSetting setting = MavenExecutorService.getInstance(project).getSetting();
+            MavenExecutorSetting setting = MavenExecutorService.getInstance(project).getCurrentSettings();
             System.out.println(setting);
-            runSetting.setOfflineMode(offlineModeCheckBox.isSelected());
+            settingsService.getCurrentSettings().setOfflineMode(offlineModeCheckBox.isSelected());
         });
         innerPropertiesPanel.add(offlineModeCheckBox, bagConstraintsBuilder().fillHorizontal().build());
 
         alwaysUpdateModeCheckBox = new JCheckBox("Update snapshots");
-        alwaysUpdateModeCheckBox.setSelected(runSetting.isAlwaysUpdateSnapshot());
+        alwaysUpdateModeCheckBox.setSelected(settingsService.getCurrentSettings().isAlwaysUpdateSnapshot());
         alwaysUpdateModeCheckBox.addActionListener(event -> {
-            runSetting.setAlwaysUpdateSnapshot(alwaysUpdateModeCheckBox.isSelected());
+            settingsService.getCurrentSettings().setAlwaysUpdateSnapshot(alwaysUpdateModeCheckBox.isSelected());
         });
         innerPropertiesPanel.add(alwaysUpdateModeCheckBox, bagConstraintsBuilder().fillHorizontal().insetLeft(20).gridx(1).gridy(0).build());
 
         skipTestCheckBox = new JCheckBox("Skip tests");
-        skipTestCheckBox.setSelected(runSetting.isSkipTests());
+        skipTestCheckBox.setSelected(settingsService.getCurrentSettings().isSkipTests());
         innerPropertiesPanel.add(skipTestCheckBox, bagConstraintsBuilder().fillHorizontal().gridx(0).gridy(1).build());
 
         skipTestCheckBox.addActionListener(event -> {
-            runSetting.setSkipTests(skipTestCheckBox.isSelected());
+            settingsService.getCurrentSettings().setSkipTests(skipTestCheckBox.isSelected());
         });
 
         threadsLabel = new JLabel("Threads:");
@@ -316,8 +385,8 @@ public class MavenExecutorToolWindow {
         threadsTextField = new IntegerField(null, 0, 99);
         threadsTextField.setColumns(2);
         threadsTextField.setCanBeEmpty(true);
-        if(runSetting.getThreadCount() != null) {
-            threadsTextField.setValue(runSetting.getThreadCount());
+        if(settingsService.getCurrentSettings().getThreadCount() != null) {
+            threadsTextField.setValue(settingsService.getCurrentSettings().getThreadCount());
         }
         threadsTextField.addCaretListener(new CaretListener() {
             @Override
@@ -325,11 +394,11 @@ public class MavenExecutorToolWindow {
                 try {
                     threadsTextField.validateContent();
                     System.out.println(threadsTextField.getValue());
-                    runSetting.setThreadCount(threadsTextField.getValue());
+                    settingsService.getCurrentSettings().setThreadCount(threadsTextField.getValue());
                 }
                 catch (ConfigurationException e) {
                     System.out.println("null");
-                    runSetting.setThreadCount(null);
+                    settingsService.getCurrentSettings().setThreadCount(null);
                 }
             }
         });
@@ -344,12 +413,12 @@ public class MavenExecutorToolWindow {
         MavenProjectsManager projectsManager = MavenProjectsManager.getInstance(project);
         //profiles.setItems(Lists.newArrayList(projectsManager.getAvailableProfiles()), a -> a);
         projectsManager.getAvailableProfiles().forEach(profile -> {
-            profiles.addItem(profile, profile, runSetting.getProfiles().contains(profile));
+            profiles.addItem(profile, profile, settingsService.getCurrentSettings().getProfiles().contains(profile));
         });
         profiles.setCheckBoxListListener(new CheckBoxListListener() {
             @Override
             public void checkBoxSelectionChanged(int index, boolean value) {
-                runSetting.setProfiles(profiles.getSelectedItemNames());
+                settingsService.getCurrentSettings().setProfiles(profiles.getSelectedItemNames());
             }
         });
 
@@ -387,11 +456,11 @@ public class MavenExecutorToolWindow {
         optionalJvmOptionsSubPanel.setLayout(optionalJvmOptionsLayout);
 
         optionalJvmOptionsCheckBox = new JCheckBox("JVM options:");
-        optionalJvmOptionsCheckBox.setSelected(runSetting.isUseOptionalJvmOptions());
+        optionalJvmOptionsCheckBox.setSelected(settingsService.getCurrentSettings().isUseOptionalJvmOptions());
 
         optionalJvmOptionsCheckBox.addActionListener(event -> {
             optionalJvmOptionsComboBox.setEnabled(optionalJvmOptionsCheckBox.isSelected());
-            runSetting.setUseOptionalJvmOptions(optionalJvmOptionsCheckBox.isSelected());
+            settingsService.getCurrentSettings().setUseOptionalJvmOptions(optionalJvmOptionsCheckBox.isSelected());
 
         });
 
@@ -403,14 +472,14 @@ public class MavenExecutorToolWindow {
         optionalJvmOptionsComboBox.setEditor(editor);
         optionalJvmOptionsComboBox.setFocusable(true);
         optionalJvmOptionsComboBox.setEnabled(optionalJvmOptionsCheckBox.isSelected());
-        optionalJvmOptionsComboBox.getEditor().setItem(runSetting.optionalJvmOptionsAsText());
+        optionalJvmOptionsComboBox.getEditor().setItem(settingsService.getCurrentSettings().optionalJvmOptionsAsText());
         optionalJvmOptionsEditor = editor.getEditorComponent();
 //        (new MavenPluginsCompletionProvider(project)).apply(optionalJvmOptionsEditor);
 
         optionalJvmOptionsEditor.addDocumentListener(new DocumentListener() {
             @Override
             public void documentChanged(DocumentEvent event) {
-                runSetting.setOptionalJvmOptions(Lists.newArrayList(optionalJvmOptionsComboBox.getEditor().getItem().toString().split("\\s")));
+                settingsService.getCurrentSettings().setOptionalJvmOptions(Lists.newArrayList(optionalJvmOptionsComboBox.getEditor().getItem().toString().split("\\s")));
             }
         });
 
@@ -426,6 +495,36 @@ public class MavenExecutorToolWindow {
                                 .addComponent(optionalJvmOptionsComboBox, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         )
         );
+    }
+
+    public void updateAll() {
+        updateGoals();
+        updateOptionalJvmOptions();
+        updateProfile();
+        updateFavorite();
+    }
+
+    private void updateGoals() {
+        goalsComboBox.getEditor().setItem(settingsService.getCurrentSettings().goalsAsText());
+    }
+
+    public void updateFavorite() {
+        createFavoritePanel();
+    }
+
+    private void updateOptionalJvmOptions() {
+        optionalJvmOptionsComboBox.setEnabled(optionalJvmOptionsCheckBox.isSelected());
+        optionalJvmOptionsComboBox.getEditor().setItem(settingsService.getCurrentSettings().optionalJvmOptionsAsText());
+    }
+
+    private void updateProfile() {
+        MavenProjectsManager projectsManager = MavenProjectsManager.getInstance(project);
+
+        profiles.clear();
+
+        projectsManager.getAvailableProfiles().forEach(profile -> {
+            profiles.addItem(profile, profile, settingsService.getCurrentSettings().getProfiles().contains(profile));
+        });
     }
 
     @NotNull

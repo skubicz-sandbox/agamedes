@@ -10,9 +10,6 @@ import com.intellij.execution.impl.DefaultJavaProgramRunner;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.runners.ProgramRunner;
 import com.intellij.openapi.project.Project;
-import com.kubicz.mavenexecutor.model.MavenArtifact;
-import com.kubicz.mavenexecutor.model.Mavenize;
-import com.kubicz.mavenexecutor.model.ProjectRootNode;
 import myToolWindow.MyMavenRunConfiguration;
 import myToolWindow.MyMavenRunConfigurationType;
 import org.jetbrains.idea.maven.execution.MavenRunnerParameters;
@@ -24,8 +21,6 @@ import org.jetbrains.idea.maven.utils.MavenUtil;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class RunMavenActionListener implements ActionListener {
@@ -41,7 +36,7 @@ public class RunMavenActionListener implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent event) {
-        MavenExecutorSetting runSetting = MavenExecutorService.getInstance(project).getSetting();
+        MavenExecutorSetting runSetting = MavenExecutorService.getInstance(project).getCurrentSettings();
         System.out.println(runSetting);
 
         MyMavenRunConfigurationType runConfigurationType = ConfigurationTypeUtil.findConfigurationType(MyMavenRunConfigurationType.class);
