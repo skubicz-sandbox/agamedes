@@ -16,7 +16,7 @@ public class SaveSettingsAction extends AnAction {
         System.out.println(settingsService.getFavoriteSettings());
 
         SaveConfirmationDialog saveConfirmationDialog = new SaveConfirmationDialog(event.getProject());
-        saveConfirmationDialog.setSettingsName(settingsService.getLastLoaded());
+        saveConfirmationDialog.setSettingsName(settingsService.getCurrentSettingsLabel());
 
         if(saveConfirmationDialog.showAndGet()) {
             settingsService.addSettings(saveConfirmationDialog.getSettingsName(), settingsService.getCurrentSettings());

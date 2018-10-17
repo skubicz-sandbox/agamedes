@@ -127,9 +127,9 @@ public class MavenExecutorToolWindow {
 
         settingsService = MavenExecutorService.getInstance(project);
 
-        if(settingsService.getCurrentSettings() == null) {
-            settingsService.setCurrentSettings(new MavenExecutorSetting());
-        }
+//        if(settingsService.getCurrentSettings() == null) {
+//            settingsService.setCurrentSettings(new MavenExecutorSetting());
+//        }
 
         createWindowToolbar();
 
@@ -214,14 +214,23 @@ public class MavenExecutorToolWindow {
 
         MavenExecutorService settingsService = MavenExecutorService.getInstance(project);
 
+        String currentSettings = settingsService.getCurrentSettingsLabel();
+
         defaultSettingsButton = new JButton("DEFAULT");
-        defaultSettingsButton.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1), BorderFactory.createEmptyBorder(3, 5, 3, 5)));
+        if(currentSettings == null) {
+            defaultSettingsButton.setFont(defaultSettingsButton.getFont().deriveFont(Font.BOLD));
+        }
+        else {
+            defaultSettingsButton.setFont(defaultSettingsButton.getFont().deriveFont(Font.PLAIN));
+        }
+        defaultSettingsButton.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(currentSettings == null ? Color.GRAY : Color.LIGHT_GRAY, 1), BorderFactory.createEmptyBorder(3, 5, 3, 5)));
         defaultSettingsButton.setMaximumSize(new Dimension(Short.MAX_VALUE, Double.valueOf(defaultSettingsButton.getMaximumSize().getHeight()).shortValue()));
+      //  defaultSettingsButton.setC
 
         defaultSettingsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                settingsService.loadSettings(defaultSettingsButton.getText());
+                settingsService.loadDefaultSettings();
 
                 updateAll();
             }
@@ -235,7 +244,14 @@ public class MavenExecutorToolWindow {
 
         settingsService.getFavoriteSettingsNames().forEach(settingName -> {
             JButton button = new JButton(settingName);
-            button.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1), BorderFactory.createEmptyBorder(3, 5, 3, 5)));
+
+            if(settingName.equals(currentSettings)) {
+                button.setFont(defaultSettingsButton.getFont().deriveFont(Font.BOLD));
+            }
+            else {
+                button.setFont(defaultSettingsButton.getFont().deriveFont(Font.PLAIN));
+            }
+            button.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(settingName.equals(currentSettings) ? Color.GRAY : Color.LIGHT_GRAY, 1), BorderFactory.createEmptyBorder(3, 5, 3, 5)));
             button.setMaximumSize(new Dimension(Short.MAX_VALUE, Double.valueOf(button.getMaximumSize().getHeight()).shortValue()));
 
 
@@ -502,6 +518,30 @@ public class MavenExecutorToolWindow {
         updateOptionalJvmOptions();
         updateProfile();
         updateFavorite();
+        updateOfflineOption();
+        updateAlwaysUpdateMode();
+        updateSkipTestsOption();
+        updateThreads();
+
+        projectsTreeView.updateTree(settingsService.getCurrentSettings().getProjectsToBuild());
+    }
+
+    private void updateThreads() {
+        Integer threadCount = settingsService.getCurrentSettings().getThreadCount();
+
+        threadsTextField.setValue(threadCount != null ? threadCount : 0);
+    }
+
+    private void updateAlwaysUpdateMode() {
+        alwaysUpdateModeCheckBox.setSelected(settingsService.getCurrentSettings().isAlwaysUpdateSnapshot());
+    }
+
+    private void updateSkipTestsOption() {
+        skipTestCheckBox.setSelected(settingsService.getCurrentSettings().isSkipTests());
+    }
+
+    private void updateOfflineOption() {
+        offlineModeCheckBox.setSelected(settingsService.getCurrentSettings().isOfflineMode());
     }
 
     private void updateGoals() {

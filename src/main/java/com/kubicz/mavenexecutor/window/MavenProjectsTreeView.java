@@ -70,6 +70,67 @@ public class MavenProjectsTreeView {
         });
     }
 
+    public void updateTree(List<ProjectToBuild> selectedNodes) {
+        CheckedTreeNode root = (CheckedTreeNode)this.tree.getModel().getRoot();
+
+        int childCount = root.getChildCount();
+
+        for (int i = 0; i < childCount; i++) {
+            CheckedTreeNode childNode = (CheckedTreeNode) root.getChildAt(i);
+
+            Mavenize mavenize = (Mavenize)childNode.getUserObject();
+            Optional<ProjectToBuild>  selectedProject = selectedNodes.stream()
+                    .filter(projectToBuild -> projectToBuild.getMavenArtifact().equalsGroupAndArtifactId(mavenize.getMavenArtifact()))
+                    .findFirst();
+
+            boolean buildEntireProject = selectedProject.map(ProjectToBuild::buildEntireProject).orElse(false);
+            if(buildEntireProject) {
+                childNode.setChecked(true);
+                checkedAllTreeNode(childNode);
+            }
+            else {
+                if (childNode.isLeaf()) {
+                    childNode.setChecked(selectedProject.map(ProjectToBuild::buildEntireProject).orElse(false));
+                } else {
+                    updateTreeNode(childNode, selectedProject.map(ProjectToBuild::getSelectedModules).orElse(new ArrayList<>()));
+                }
+            }
+        }
+    }
+
+    private void checkedAllTreeNode(DefaultMutableTreeNode node) {
+        int childCount = node.getChildCount();
+
+        for (int i = 0; i < childCount; i++) {
+            CheckedTreeNode childNode = (CheckedTreeNode) node.getChildAt(i);
+
+            if (childNode.isLeaf()) {
+                childNode.setChecked(true);
+            } else {
+                checkedAllTreeNode(childNode);
+            }
+        }
+    }
+
+    private void updateTreeNode(DefaultMutableTreeNode node, List<MavenArtifact> selectedNodes) {
+        int childCount = node.getChildCount();
+
+        for (int i = 0; i < childCount; i++) {
+            CheckedTreeNode childNode = (CheckedTreeNode) node.getChildAt(i);
+
+            Mavenize mavenize = (Mavenize)childNode.getUserObject();
+            Optional<MavenArtifact>  selectedProject = selectedNodes.stream()
+                    .filter(artifact -> artifact.equalsGroupAndArtifactId(mavenize.getMavenArtifact()))
+                    .findFirst();
+
+            if (childNode.isLeaf()) {
+                childNode.setChecked(selectedProject.isPresent());
+            } else {
+                updateTreeNode(childNode, selectedNodes);
+            }
+        }
+    }
+
     private boolean containsArtifact(MavenArtifact searched, List<MavenArtifact> listToFilter) {
         if (listToFilter == null) {
             return false;

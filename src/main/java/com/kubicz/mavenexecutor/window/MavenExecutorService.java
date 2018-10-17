@@ -14,7 +14,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @State(name = "mavenExecutorSetting", storages = @Storage("mavenExecutorSetting.xml"))
 public class MavenExecutorService implements PersistentStateComponent<MavenExecutorService> {
@@ -22,19 +21,25 @@ public class MavenExecutorService implements PersistentStateComponent<MavenExecu
     @Tag("currentSettings")
     private MavenExecutorSetting currentSettings;
 
+    @Tag("defaultSettings")
+    private MavenExecutorSetting defaultSettings;
+
     @Tag("favoriteSettings")
     private Map<String, MavenExecutorSetting> favorite;
 
-    private String lastLoaded;
+    private String currentSettingsLabel;
 
     private MavenExecutorSetting lastUnsavedSetting;
 
     public MavenExecutorService() {
+        this.currentSettings = new MavenExecutorSetting();
+        this.defaultSettings = new MavenExecutorSetting();
         this.favorite = new HashMap<>();
     }
 
     public MavenExecutorService(Project project) {
         this.currentSettings = new MavenExecutorSetting();
+        this.defaultSettings = new MavenExecutorSetting();
         this.favorite = new HashMap<>();
     }
 
@@ -43,12 +48,13 @@ public class MavenExecutorService implements PersistentStateComponent<MavenExecu
     }
 
     public MavenExecutorSetting getCurrentSettings() {
-        return currentSettings;
+     //   return currentSettings;
+        return favorite.getOrDefault(currentSettingsLabel, defaultSettings);
     }
 
-    public void setCurrentSettings(MavenExecutorSetting setting) {
-        this.currentSettings = setting;
-    }
+//    public void setCurrentSettings(MavenExecutorSetting setting) {
+//        this.currentSettings = setting;
+//    }
 
     @Nullable
     @Override
@@ -63,12 +69,12 @@ public class MavenExecutorService implements PersistentStateComponent<MavenExecu
         XmlSerializerUtil.copyBean(state, this);
     }
 
-    public String getLastLoaded() {
-        return lastLoaded;
+    public String getCurrentSettingsLabel() {
+        return currentSettingsLabel;
     }
 
-    public void setLastLoaded(String lastLoaded) {
-        this.lastLoaded = lastLoaded;
+    public void setCurrentSettingsLabel(String currentSettingsLabel) {
+        this.currentSettingsLabel = currentSettingsLabel;
     }
 
     public List<MavenExecutorSetting> getFavoriteSettings() {
@@ -84,7 +90,13 @@ public class MavenExecutorService implements PersistentStateComponent<MavenExecu
     }
 
     public void loadSettings(String settingsName) {
-        currentSettings = favorite.get(settingsName);
+    //    currentSettings = favorite.get(settingsName);
+        currentSettingsLabel = settingsName;
+    }
+
+    public void loadDefaultSettings() {
+    //    currentSettings = defaultSettings;
+        currentSettingsLabel = null;
     }
 
     public void removeFavoriteSettings(String settingsName) {
