@@ -8,19 +8,23 @@ import org.jetbrains.idea.maven.project.MavenProject;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
 
 import javax.swing.*;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import java.awt.*;
 import java.awt.event.FocusListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.*;
 import java.util.List;
 
 public class MavenProjectsTreeView {
 
-    private CheckboxTree tree;
+    private MyCheckboxTree tree;
 
-    private CheckboxTree.CheckboxTreeCellRenderer renderer = new CheckboxTree.CheckboxTreeCellRenderer() {
+    private MyCheckboxTreeBase.CheckboxTreeCellRendererBase renderer = new MyCheckboxTreeBase.CheckboxTreeCellRendererBase() {
         @Override
         public void customizeRenderer(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
             if (!(value instanceof DefaultMutableTreeNode)) {
@@ -53,7 +57,7 @@ public class MavenProjectsTreeView {
 
         }
 
-        this.tree = new CheckboxTree(renderer, root);
+        this.tree = new MyCheckboxTree(renderer, root);
 
         for(int i = 0; i < this.tree.getRowCount(); ++i) {
             this.tree.expandRow(i);
@@ -96,6 +100,8 @@ public class MavenProjectsTreeView {
                 }
             }
         }
+
+        tree.repaint();
     }
 
     private void checkedAllTreeNode(DefaultMutableTreeNode node) {
@@ -228,6 +234,7 @@ public class MavenProjectsTreeView {
                 else {
                     Object userObject = node.getUserObject();
                     if(node.isChecked() && userObject != null && nodeType.isAssignableFrom(userObject.getClass())) {
+             //       if(isChecked(node) && userObject != null && nodeType.isAssignableFrom(userObject.getClass())) {
                         final T value = (T)userObject;
                         nodes.add(value);
                     }
@@ -243,6 +250,33 @@ public class MavenProjectsTreeView {
         }.collect(root);
 
         return nodes;
+    }
+
+    private boolean isChecked(final CheckedTreeNode node) {
+//        if (myIgnoreInheritance) return node.isChecked() ? CheckboxTreeBase.NodeState.FULL : CheckboxTreeBase.NodeState.CLEAR;
+//        final boolean checked = node.isChecked();
+//        if (node.getChildCount() == 0 || !myUsePartialStatusForParentNodes) return checked ? CheckboxTreeBase.NodeState.FULL : CheckboxTreeBase.NodeState.CLEAR;
+
+//        boolean result = false;
+
+        for (int i = 0; i < node.getChildCount(); i++) {
+            TreeNode child = node.getChildAt(i);
+//            CheckboxTreeBase.NodeState childStatus = child instanceof CheckedTreeNode? isChecked((CheckedTreeNode)child) :
+//                    checked? CheckboxTreeBase.NodeState.FULL : CheckboxTreeBase.NodeState.CLEAR;
+            boolean childStatus = ((CheckedTreeNode)child).isChecked();
+
+            if (!childStatus) {
+                return false;
+            }
+//            if (!result) {
+//                result = childStatus;
+//            }
+//            else if (result != childStatus) {
+//                return false;
+//            }
+        }
+
+        return true;
     }
 
     private void findChildren(MavenProject rootProject, MavenProjectsManager projectsManager, String offset, CheckedTreeNode root, Optional<ProjectToBuild> projectToBuild) {

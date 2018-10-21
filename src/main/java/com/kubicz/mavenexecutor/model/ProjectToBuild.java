@@ -4,6 +4,7 @@ import com.intellij.util.xmlb.annotations.Tag;
 import com.kubicz.mavenexecutor.window.ListTextMapper;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -27,14 +28,14 @@ public class ProjectToBuild {
         this.displayName = displayName;
         this.mavenArtifact = mavenArtifact;
         this.projectDictionary = projectDictionary;
-        this.selectedModules = Optional.ofNullable(selectedModules).orElse(Collections.emptyList());
+        this.selectedModules = Optional.ofNullable(selectedModules).orElse(new ArrayList<>());
     }
 
     public ProjectToBuild(@NotNull String displayName, @NotNull MavenArtifact mavenArtifact, String projectDictionary) {
         this.displayName = displayName;
         this.mavenArtifact = mavenArtifact;
         this.projectDictionary = projectDictionary;
-        this.selectedModules = Collections.emptyList();
+        this.selectedModules = new ArrayList<>();
     }
 
     public boolean buildEntireProject() {

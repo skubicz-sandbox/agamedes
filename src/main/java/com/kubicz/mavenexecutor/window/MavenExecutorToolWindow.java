@@ -10,6 +10,8 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
+import com.intellij.openapi.fileEditor.FileEditor;
+import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileTypes.PlainTextFileType;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
@@ -17,18 +19,18 @@ import com.intellij.openapi.roots.ModuleRootEvent;
 import com.intellij.openapi.roots.ModuleRootListener;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.ui.*;
 import com.intellij.ui.components.fields.IntegerField;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import com.intellij.util.ui.JBUI;
-import com.kubicz.mavenexecutor.model.MavenArtifact;
-import com.kubicz.mavenexecutor.model.Mavenize;
-import com.kubicz.mavenexecutor.model.ProjectRootNode;
-import com.kubicz.mavenexecutor.model.ProjectToBuild;
+import com.kubicz.mavenexecutor.model.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.execution.MavenArgumentsCompletionProvider;
+import org.jetbrains.idea.maven.model.MavenId;
+import org.jetbrains.idea.maven.project.MavenProject;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
 
 import javax.swing.*;
@@ -40,8 +42,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -56,6 +60,10 @@ public class MavenExecutorToolWindow {
     private JPanel mainContent;
 
     private JPanel configPanel;
+
+    private JPanel selectCurrentPanel;
+
+    private JButton selectCurrentButton;
 
     private JPanel goalsSubPanel;
 
@@ -178,6 +186,7 @@ public class MavenExecutorToolWindow {
         projectsTreeView.addCheckboxTreeListener(new CheckboxTreeAdapter() {
             @Override
             public void nodeStateChanged(@NotNull CheckedTreeNode node) {
+            //    System.out.println(((Mavenize)node.getUserObject()).getMavenArtifact().getArtifactId());
                 Map<ProjectRootNode, List<Mavenize>> selectedProjects = projectsTreeView.findSelectedProjects();
 
                 List<ProjectToBuild> projectsToBuild = selectedProjects.entrySet().stream()
@@ -196,9 +205,75 @@ public class MavenExecutorToolWindow {
 
         JScrollPane scrollPane = ScrollPaneFactory.createScrollPane(projectsTreeView.getTreeComponent());
 
+        selectCurrentPanel = new JPanel();
+        selectCurrentPanel.setLayout(new BoxLayout(selectCurrentPanel, BoxLayout.PAGE_AXIS));
+        selectCurrentButton = new JButton("Select current");
+        selectCurrentButton.setMaximumSize(new Dimension(Short.MAX_VALUE, Double.valueOf(selectCurrentButton.getMaximumSize().getHeight()).shortValue()));
+        selectCurrentButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                MavenProjectsManager projectsManager = MavenProjectsManager.getInstance(project);
+                FileEditorManager manager = FileEditorManager.getInstance(project);
+
+                FileEditor[] fileEditors = manager.getSelectedEditors();
+
+                if(fileEditors.length > 0) {
+                    List<ProjectToBuild> projectsToBuild = new ArrayList<>();
+
+                    for(FileEditor editor : fileEditors) {
+                        VirtualFile currentFile = editor.getFile();
+                        if(currentFile != null) {
+                            MavenProject currentProject = projectsManager.findContainingProject(currentFile);
+                            if(currentProject != null) {
+                                MavenId currentArtifact = currentProject.getMavenId();
+                                MavenProject currentRootProject = projectsManager.findRootProject(currentProject);
+
+                                if(currentRootProject == null) {
+                                    continue;
+                                }
+
+                                MavenArtifact selectedArtifact = new MavenArtifact(currentArtifact.getGroupId(), currentArtifact.getArtifactId(), currentArtifact.getVersion());
+                                MavenArtifact rootArtifact = new MavenArtifact(currentRootProject.getMavenId().getGroupId(), currentRootProject.getMavenId().getArtifactId(), currentRootProject.getMavenId().getVersion());
+
+                                Optional<ProjectToBuild> projectToBuildOptional = projectsToBuild.stream()
+                                        .filter(item -> {
+                                            return item.getMavenArtifact().equalsGroupAndArtifactId(rootArtifact);
+                                        })
+                                        .findFirst();
+
+                                ProjectToBuild projectToBuild;
+                                if(projectToBuildOptional.isPresent()) {
+                                    projectToBuild = projectToBuildOptional.get();
+                                }
+                                else {
+                                    projectToBuild = new ProjectToBuild(currentRootProject.getDisplayName(), rootArtifact, currentRootProject.getDirectoryFile().getPath());
+                                    projectsToBuild.add(projectToBuild);
+                                }
+
+                                if(!rootArtifact.equalsGroupAndArtifactId(selectedArtifact)) {
+                                    projectToBuild.getSelectedModules().add(selectedArtifact);
+
+                                    for(MavenProject mavenProject : projectsManager.findInheritors(currentProject)) {
+                                        MavenArtifact artifact = new MavenArtifact(mavenProject.getMavenId().getGroupId(), mavenProject.getMavenId().getArtifactId(), mavenProject.getMavenId().getVersion());
+
+                                        projectToBuild.getSelectedModules().add(artifact);
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                    settingsService.getCurrentSettings().setProjectsToBuild(projectsToBuild);
+                    updateProjectTree();
+                }
+            }
+        });
+        selectCurrentPanel.add(selectCurrentButton);
+
         mainContent.add(configPanel, bagConstraintsBuilder().fillHorizontal().gridx(0).gridy(0).weightx(1.0).gridwidth(2).build());
         mainContent.add(scrollPane, bagConstraintsBuilder().fillBoth().weightx(1.0).gridx(0).gridy(1).build());
         mainContent.add(favoritePanel, bagConstraintsBuilder().fillVertical().weightx(0.0).weighty(1.0).gridx(1).gridy(1).build());
+        mainContent.add(selectCurrentPanel, bagConstraintsBuilder().fillHorizontal().weightx(1.0).weighty(0.0).gridx(0).gridy(2).build());
 
         toolWindowContent.setContent(mainContent);
     }
@@ -522,7 +597,10 @@ public class MavenExecutorToolWindow {
         updateAlwaysUpdateMode();
         updateSkipTestsOption();
         updateThreads();
+        updateProjectTree();
+    }
 
+    private void updateProjectTree() {
         projectsTreeView.updateTree(settingsService.getCurrentSettings().getProjectsToBuild());
     }
 
@@ -553,7 +631,8 @@ public class MavenExecutorToolWindow {
     }
 
     private void updateOptionalJvmOptions() {
-        optionalJvmOptionsComboBox.setEnabled(optionalJvmOptionsCheckBox.isSelected());
+        optionalJvmOptionsCheckBox.setSelected(settingsService.getCurrentSettings().isUseOptionalJvmOptions());
+        optionalJvmOptionsComboBox.setEnabled(settingsService.getCurrentSettings().isUseOptionalJvmOptions());
         optionalJvmOptionsComboBox.getEditor().setItem(settingsService.getCurrentSettings().optionalJvmOptionsAsText());
     }
 
