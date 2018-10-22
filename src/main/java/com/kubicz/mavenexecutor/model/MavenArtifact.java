@@ -1,11 +1,18 @@
 package com.kubicz.mavenexecutor.model;
 
+import com.intellij.util.xmlb.annotations.Property;
+
+import java.io.Serializable;
+
 public class MavenArtifact {
 
+    @Property
     private String groupId;
 
+    @Property
     private String artifactId;
 
+    @Property
     private String version;
 
     protected MavenArtifact() {
@@ -41,15 +48,4 @@ public class MavenArtifact {
         return version;
     }
 
-    public void setGroupId(String groupId) {
-        this.groupId = groupId;
-    }
-
-    public void setArtifactId(String artifactId) {
-        this.artifactId = artifactId;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
 }

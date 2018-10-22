@@ -1,9 +1,12 @@
 package com.kubicz.mavenexecutor.model;
 
+import com.intellij.util.xmlb.annotations.Attribute;
+import com.intellij.util.xmlb.annotations.Property;
 import com.intellij.util.xmlb.annotations.Tag;
 import com.kubicz.mavenexecutor.window.ListTextMapper;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -11,10 +14,13 @@ import java.util.Optional;
 
 public class ProjectToBuild {
 
+    @Property
     private String displayName;
 
+    @Property
     private MavenArtifact mavenArtifact;
 
+    @Property
     private String projectDictionary;
 
     @Tag("selectedModules")
@@ -28,14 +34,14 @@ public class ProjectToBuild {
         this.displayName = displayName;
         this.mavenArtifact = mavenArtifact;
         this.projectDictionary = projectDictionary;
-        this.selectedModules = Optional.ofNullable(selectedModules).orElse(new ArrayList<>());
+        this.selectedModules = Optional.ofNullable(selectedModules).orElse(Collections.emptyList());
     }
 
     public ProjectToBuild(@NotNull String displayName, @NotNull MavenArtifact mavenArtifact, String projectDictionary) {
         this.displayName = displayName;
         this.mavenArtifact = mavenArtifact;
         this.projectDictionary = projectDictionary;
-        this.selectedModules = new ArrayList<>();
+        this.selectedModules = Collections.emptyList();
     }
 
     public boolean buildEntireProject() {
@@ -62,19 +68,5 @@ public class ProjectToBuild {
         return projectDictionary;
     }
 
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
 
-    public void setMavenArtifact(MavenArtifact mavenArtifact) {
-        this.mavenArtifact = mavenArtifact;
-    }
-
-    public void setProjectDictionary(String projectDictionary) {
-        this.projectDictionary = projectDictionary;
-    }
-
-    public void setSelectedModules(List<MavenArtifact> selectedModules) {
-        this.selectedModules = selectedModules;
-    }
 }

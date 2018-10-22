@@ -6,11 +6,13 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import com.intellij.util.xmlb.annotations.Property;
 import com.intellij.util.xmlb.annotations.Tag;
 import org.fest.util.Lists;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,16 +33,21 @@ public class MavenExecutorService implements PersistentStateComponent<MavenExecu
 
     private MavenExecutorSetting lastUnsavedSetting;
 
+    @Property
+    private List<String> goalsHistory;
+
     public MavenExecutorService() {
         this.currentSettings = new MavenExecutorSetting();
         this.defaultSettings = new MavenExecutorSetting();
         this.favorite = new HashMap<>();
+        this.goalsHistory = new ArrayList<>();
     }
 
     public MavenExecutorService(Project project) {
         this.currentSettings = new MavenExecutorSetting();
         this.defaultSettings = new MavenExecutorSetting();
         this.favorite = new HashMap<>();
+        this.goalsHistory = new ArrayList<>();
     }
 
     public static MavenExecutorService getInstance(@NotNull Project project) {
@@ -55,6 +62,19 @@ public class MavenExecutorService implements PersistentStateComponent<MavenExecu
 //    public void setCurrentSettings(MavenExecutorSetting setting) {
 //        this.currentSettings = setting;
 //    }
+
+    public List<String> getGoalsHistory() {
+        return goalsHistory;
+    }
+
+    public void addGoalsToHistory(String goals) {
+        if(!goalsHistory.contains(goals)) {
+            goalsHistory.add(0, goals);
+        }
+        while (goalsHistory.size() > 20) {
+            goalsHistory.remove(20);
+        }
+    }
 
     @Nullable
     @Override

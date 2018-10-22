@@ -38,14 +38,9 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
+import java.awt.event.*;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -218,7 +213,7 @@ public class MavenExecutorToolWindow {
                 FileEditor[] fileEditors = manager.getSelectedEditors();
 
                 if(fileEditors.length > 0) {
-                    List<ProjectToBuild> projectsToBuild = new ArrayList<>();
+                    List<ProjectToBuildBuilder> projectsToBuild = new ArrayList<>();
 
                     for(FileEditor editor : fileEditors) {
                         VirtualFile currentFile = editor.getFile();
@@ -235,35 +230,40 @@ public class MavenExecutorToolWindow {
                                 MavenArtifact selectedArtifact = new MavenArtifact(currentArtifact.getGroupId(), currentArtifact.getArtifactId(), currentArtifact.getVersion());
                                 MavenArtifact rootArtifact = new MavenArtifact(currentRootProject.getMavenId().getGroupId(), currentRootProject.getMavenId().getArtifactId(), currentRootProject.getMavenId().getVersion());
 
-                                Optional<ProjectToBuild> projectToBuildOptional = projectsToBuild.stream()
+                                Optional<ProjectToBuildBuilder> projectToBuildOptional = projectsToBuild.stream()
                                         .filter(item -> {
                                             return item.getMavenArtifact().equalsGroupAndArtifactId(rootArtifact);
                                         })
                                         .findFirst();
 
-                                ProjectToBuild projectToBuild;
+                                ProjectToBuildBuilder projectToBuild;
                                 if(projectToBuildOptional.isPresent()) {
                                     projectToBuild = projectToBuildOptional.get();
                                 }
                                 else {
-                                    projectToBuild = new ProjectToBuild(currentRootProject.getDisplayName(), rootArtifact, currentRootProject.getDirectoryFile().getPath());
+                                //    projectToBuild = new ProjectToBuild(currentRootProject.getDisplayName(), rootArtifact, currentRootProject.getDirectoryFile().getPath());
+                                    projectToBuild = new ProjectToBuildBuilder()
+                                            .displayName(currentRootProject.getDisplayName())
+                                            .mavenArtifact(rootArtifact)
+                                            .projectDictionary(currentRootProject.getDirectoryFile().getPath());
+
                                     projectsToBuild.add(projectToBuild);
                                 }
 
                                 if(!rootArtifact.equalsGroupAndArtifactId(selectedArtifact)) {
-                                    projectToBuild.getSelectedModules().add(selectedArtifact);
+                                    projectToBuild.addArtifact(selectedArtifact);
 
                                     for(MavenProject mavenProject : projectsManager.findInheritors(currentProject)) {
                                         MavenArtifact artifact = new MavenArtifact(mavenProject.getMavenId().getGroupId(), mavenProject.getMavenId().getArtifactId(), mavenProject.getMavenId().getVersion());
 
-                                        projectToBuild.getSelectedModules().add(artifact);
+                                        projectToBuild.addArtifact(artifact);
                                     }
                                 }
 
                             }
                         }
                     }
-                    settingsService.getCurrentSettings().setProjectsToBuild(projectsToBuild);
+                    settingsService.getCurrentSettings().setProjectsToBuild(projectsToBuild.stream().map(ProjectToBuildBuilder::build).collect(Collectors.toList()));
                     updateProjectTree();
                 }
             }
@@ -388,8 +388,8 @@ public class MavenExecutorToolWindow {
     }
 
     private void createGoalsSubPanel() {
-        String[] history = {""};
-        this.goalsComboBox = new ComboBox(history);
+        // TODO do przerobienia
+        this.goalsComboBox = new ComboBox(settingsService.getGoalsHistory().stream().sorted(Comparator.reverseOrder()).collect(Collectors.toList()).toArray(new String[0]));
 
         this.goalsComboBox.setLightWeightPopupEnabled(false);
         EditorComboBoxEditor editor = new StringComboboxEditor(project, PlainTextFileType.INSTANCE, this.goalsComboBox);
@@ -412,6 +412,20 @@ public class MavenExecutorToolWindow {
                 }
 
                 runMavenButton.setEnabled(canExecute());
+            }
+        });
+
+        goalsEditor.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                String goalsText = goalsComboBox.getEditor().getItem() + "";
+                settingsService.addGoalsToHistory(goalsText);
+
+                // TODO do przerobienia .sorted(Comparator.reverseOrder())
+                String current = settingsService.getCurrentSettings().goalsAsText();
+                goalsComboBox.setModel(new DefaultComboBoxModel<>(settingsService.getGoalsHistory().stream().collect(Collectors.toList()).toArray(new String[0])));
+                goalsComboBox.getModel().setSelectedItem(current);
+             //   goalsComboBox.getEditor().setItem(;
             }
         });
 

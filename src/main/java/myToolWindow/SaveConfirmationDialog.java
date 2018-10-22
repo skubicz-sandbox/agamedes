@@ -5,6 +5,7 @@ import com.intellij.openapi.ui.DialogWrapper;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.*;
 
 public class SaveConfirmationDialog extends DialogWrapper {
@@ -32,5 +33,11 @@ public class SaveConfirmationDialog extends DialogWrapper {
 
     public void setSettingsName(String settingsName) {
         this.settingsName.setText(settingsName);
+    }
+
+    @Nullable
+    @Override
+    public JComponent getPreferredFocusedComponent() {
+        return settingsName;
     }
 }

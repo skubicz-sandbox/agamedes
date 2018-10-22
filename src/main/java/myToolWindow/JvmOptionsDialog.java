@@ -47,5 +47,9 @@ public class JvmOptionsDialog extends DialogWrapper {
         return contentPane;
     }
 
-
+    @Nullable
+    @Override
+    public JComponent getPreferredFocusedComponent() {
+        return jvmOptionTextArea;
+    }
 }
