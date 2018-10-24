@@ -34,20 +34,21 @@ public class MavenExecutorService implements PersistentStateComponent<MavenExecu
     private MavenExecutorSetting lastUnsavedSetting;
 
     @Property
-    private List<String> goalsHistory;
+    private History goalsHistory;
 
-    public MavenExecutorService() {
-        this.currentSettings = new MavenExecutorSetting();
-        this.defaultSettings = new MavenExecutorSetting();
-        this.favorite = new HashMap<>();
-        this.goalsHistory = new ArrayList<>();
+    @Property
+    private History jvmOptionHistory;
+
+    protected MavenExecutorService() {
+        this(null);
     }
 
     public MavenExecutorService(Project project) {
         this.currentSettings = new MavenExecutorSetting();
         this.defaultSettings = new MavenExecutorSetting();
         this.favorite = new HashMap<>();
-        this.goalsHistory = new ArrayList<>();
+        this.goalsHistory = new History();
+        this.jvmOptionHistory = new History();
     }
 
     public static MavenExecutorService getInstance(@NotNull Project project) {
@@ -63,17 +64,12 @@ public class MavenExecutorService implements PersistentStateComponent<MavenExecu
 //        this.currentSettings = setting;
 //    }
 
-    public List<String> getGoalsHistory() {
+    public History getGoalsHistory() {
         return goalsHistory;
     }
 
-    public void addGoalsToHistory(String goals) {
-        if(!goalsHistory.contains(goals)) {
-            goalsHistory.add(0, goals);
-        }
-        while (goalsHistory.size() > 20) {
-            goalsHistory.remove(20);
-        }
+    public History getJvmOptionHistory() {
+        return jvmOptionHistory;
     }
 
     @Nullable

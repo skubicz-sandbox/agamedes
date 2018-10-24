@@ -34,7 +34,6 @@ import org.jetbrains.idea.maven.project.MavenProject;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
 
 import javax.swing.*;
-import javax.swing.border.CompoundBorder;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import java.awt.*;
@@ -389,7 +388,7 @@ public class MavenExecutorToolWindow {
 
     private void createGoalsSubPanel() {
         // TODO do przerobienia
-        this.goalsComboBox = new ComboBox(settingsService.getGoalsHistory().stream().sorted(Comparator.reverseOrder()).collect(Collectors.toList()).toArray(new String[0]));
+        this.goalsComboBox = new ComboBox(settingsService.getGoalsHistory().asArray());
 
         this.goalsComboBox.setLightWeightPopupEnabled(false);
         EditorComboBoxEditor editor = new StringComboboxEditor(project, PlainTextFileType.INSTANCE, this.goalsComboBox);
@@ -418,14 +417,12 @@ public class MavenExecutorToolWindow {
         goalsEditor.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                String goalsText = goalsComboBox.getEditor().getItem() + "";
-                settingsService.addGoalsToHistory(goalsText);
-
-                // TODO do przerobienia .sorted(Comparator.reverseOrder())
                 String current = settingsService.getCurrentSettings().goalsAsText();
-                goalsComboBox.setModel(new DefaultComboBoxModel<>(settingsService.getGoalsHistory().stream().collect(Collectors.toList()).toArray(new String[0])));
+                settingsService.getGoalsHistory().add(current);
+
+                // refresh comboBox values
+                goalsComboBox.setModel(new DefaultComboBoxModel<>(settingsService.getGoalsHistory().asArray()));
                 goalsComboBox.getModel().setSelectedItem(current);
-             //   goalsComboBox.getEditor().setItem(;
             }
         });
 
@@ -569,7 +566,7 @@ public class MavenExecutorToolWindow {
 
         });
 
-        optionalJvmOptionsComboBox = new ComboBox();
+        optionalJvmOptionsComboBox = new ComboBox(settingsService.getJvmOptionHistory().asArray());
         optionalJvmOptionsComboBox.setLightWeightPopupEnabled(false);
         EditorComboBoxEditor editor = new StringComboboxEditor(project, PlainTextFileType.INSTANCE, optionalJvmOptionsComboBox);
         optionalJvmOptionsComboBox.setRenderer(new EditorComboBoxRenderer(editor));
@@ -585,6 +582,18 @@ public class MavenExecutorToolWindow {
             @Override
             public void documentChanged(DocumentEvent event) {
                 settingsService.getCurrentSettings().setOptionalJvmOptions(Lists.newArrayList(optionalJvmOptionsComboBox.getEditor().getItem().toString().split("\\s")));
+            }
+        });
+
+        optionalJvmOptionsEditor.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                String current = settingsService.getCurrentSettings().optionalJvmOptionsAsText();
+                settingsService.getJvmOptionHistory().add(current);
+
+                // refresh comboBox values
+                optionalJvmOptionsComboBox.setModel(new DefaultComboBoxModel<>(settingsService.getJvmOptionHistory().asArray()));
+                optionalJvmOptionsComboBox.getModel().setSelectedItem(current);
             }
         });
 
