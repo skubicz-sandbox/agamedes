@@ -9,6 +9,13 @@ public class ProjectToBuildBuilder {
     private String projectDictionary;
     private List<MavenArtifact> selectedModules;
 
+    public ProjectToBuildBuilder(String displayName, MavenArtifact mavenArtifact, String projectDictionary) {
+        this.displayName = displayName;
+        this.mavenArtifact = mavenArtifact;
+        this.projectDictionary = projectDictionary;
+        this.selectedModules = new ArrayList<>();
+    }
+
     public ProjectToBuildBuilder() {
         this.selectedModules = new ArrayList<>();
     }

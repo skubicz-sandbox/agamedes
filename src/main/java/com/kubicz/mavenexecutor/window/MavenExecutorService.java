@@ -110,6 +110,11 @@ public class MavenExecutorService implements PersistentStateComponent<MavenExecu
         currentSettingsLabel = settingsName;
     }
 
+    public boolean isDefaultSettings() {
+        //    currentSettings = defaultSettings;
+        return currentSettingsLabel == null;
+    }
+
     public void loadDefaultSettings() {
     //    currentSettings = defaultSettings;
         currentSettingsLabel = null;

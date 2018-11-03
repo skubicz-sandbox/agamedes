@@ -27,11 +27,9 @@ public class RunMavenActionListener implements ActionListener {
 
     private Project project;
 
-    private MavenProjectsTreeView projectsTree;
 
-    public RunMavenActionListener(Project project, MavenProjectsTreeView projectsTree) {
+    public RunMavenActionListener(Project project) {
         this.project = project;
-        this.projectsTree = projectsTree;
     }
 
     @Override

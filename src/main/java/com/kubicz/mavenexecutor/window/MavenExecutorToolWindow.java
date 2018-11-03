@@ -4,14 +4,11 @@ import com.google.common.collect.Lists;
 import com.intellij.ProjectTopics;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.ActionManager;
-import com.intellij.openapi.actionSystem.ActionPopupMenu;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
-import com.intellij.openapi.fileEditor.FileEditor;
-import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileTypes.PlainTextFileType;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
@@ -19,27 +16,27 @@ import com.intellij.openapi.roots.ModuleRootEvent;
 import com.intellij.openapi.roots.ModuleRootListener;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.ui.*;
 import com.intellij.ui.components.fields.IntegerField;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
-import com.intellij.util.ui.JBUI;
-import com.kubicz.mavenexecutor.model.*;
+import com.kubicz.mavenexecutor.model.MavenArtifact;
+import com.kubicz.mavenexecutor.model.Mavenize;
+import com.kubicz.mavenexecutor.model.ProjectRootNode;
+import com.kubicz.mavenexecutor.model.ProjectToBuild;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.execution.MavenArgumentsCompletionProvider;
-import org.jetbrains.idea.maven.model.MavenId;
-import org.jetbrains.idea.maven.project.MavenProject;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
 
 import javax.swing.*;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -55,9 +52,7 @@ public class MavenExecutorToolWindow {
 
     private JPanel configPanel;
 
-    private JPanel selectCurrentPanel;
-
-    private JButton selectCurrentButton;
+    private SelectCurrentPanel selectCurrentPanel;
 
     private JPanel goalsSubPanel;
 
@@ -65,9 +60,7 @@ public class MavenExecutorToolWindow {
 
     private JPanel optionalJvmOptionsSubPanel;
 
-    private JPanel favoritePanel;
-
-    private JButton defaultSettingsButton;
+    private FavoritePanel favoritePanel;
 
     private MavenProjectsTreeView projectsTreeView;
 
@@ -95,7 +88,9 @@ public class MavenExecutorToolWindow {
 
     private CustomCheckBoxList profiles;
 
-    private MavenExecutorService settingsService;
+    private ConfigPanel configPanel2;
+
+    public MavenExecutorService settingsService;
 
     public MavenExecutorToolWindow(Project project) {
         this.project = project;
@@ -175,6 +170,15 @@ public class MavenExecutorToolWindow {
 
         MavenProjectsManager projectsManager = MavenProjectsManager.getInstance(project);
 
+
+        favoritePanel = new FavoritePanel(project, this);
+
+        configPanel2 = new ConfigPanel(project, this);
+        //   createConfigPanel();
+
+
+        selectCurrentPanel = new SelectCurrentPanel(project, this);
+
         projectsTreeView = new MavenProjectsTreeView(projectsManager, settingsService.getCurrentSettings().getProjectsToBuild());
       //  projectsTreeView.addFocusLostListener(new MavenProjectsTreeViewListener(runSetting, projectsTreeView));
         projectsTreeView.addCheckboxTreeListener(new CheckboxTreeAdapter() {
@@ -189,177 +193,22 @@ public class MavenExecutorToolWindow {
 
                 settingsService.getCurrentSettings().setProjectsToBuild(projectsToBuild);
 
-                runMavenButton.setEnabled(canExecute());
+                configPanel2.updateRunButton();
+                //TODO odswierzenie runMavenButton
+           //     runMavenButton.setEnabled(canExecute());
             }
         });
-
-        createFavoritePanel();
-
-        createConfigPanel();
 
         JScrollPane scrollPane = ScrollPaneFactory.createScrollPane(projectsTreeView.getTreeComponent());
 
-        selectCurrentPanel = new JPanel();
-        selectCurrentPanel.setLayout(new BoxLayout(selectCurrentPanel, BoxLayout.PAGE_AXIS));
-        selectCurrentButton = new JButton("Select current");
-        selectCurrentButton.setMaximumSize(new Dimension(Short.MAX_VALUE, Double.valueOf(selectCurrentButton.getMaximumSize().getHeight()).shortValue()));
-        selectCurrentButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                MavenProjectsManager projectsManager = MavenProjectsManager.getInstance(project);
-                FileEditorManager manager = FileEditorManager.getInstance(project);
-
-                FileEditor[] fileEditors = manager.getSelectedEditors();
-
-                if(fileEditors.length > 0) {
-                    List<ProjectToBuildBuilder> projectsToBuild = new ArrayList<>();
-
-                    for(FileEditor editor : fileEditors) {
-                        VirtualFile currentFile = editor.getFile();
-                        if(currentFile != null) {
-                            MavenProject currentProject = projectsManager.findContainingProject(currentFile);
-                            if(currentProject != null) {
-                                MavenId currentArtifact = currentProject.getMavenId();
-                                MavenProject currentRootProject = projectsManager.findRootProject(currentProject);
-
-                                if(currentRootProject == null) {
-                                    continue;
-                                }
-
-                                MavenArtifact selectedArtifact = new MavenArtifact(currentArtifact.getGroupId(), currentArtifact.getArtifactId(), currentArtifact.getVersion());
-                                MavenArtifact rootArtifact = new MavenArtifact(currentRootProject.getMavenId().getGroupId(), currentRootProject.getMavenId().getArtifactId(), currentRootProject.getMavenId().getVersion());
-
-                                Optional<ProjectToBuildBuilder> projectToBuildOptional = projectsToBuild.stream()
-                                        .filter(item -> {
-                                            return item.getMavenArtifact().equalsGroupAndArtifactId(rootArtifact);
-                                        })
-                                        .findFirst();
-
-                                ProjectToBuildBuilder projectToBuild;
-                                if(projectToBuildOptional.isPresent()) {
-                                    projectToBuild = projectToBuildOptional.get();
-                                }
-                                else {
-                                //    projectToBuild = new ProjectToBuild(currentRootProject.getDisplayName(), rootArtifact, currentRootProject.getDirectoryFile().getPath());
-                                    projectToBuild = new ProjectToBuildBuilder()
-                                            .displayName(currentRootProject.getDisplayName())
-                                            .mavenArtifact(rootArtifact)
-                                            .projectDictionary(currentRootProject.getDirectoryFile().getPath());
-
-                                    projectsToBuild.add(projectToBuild);
-                                }
-
-                                if(!rootArtifact.equalsGroupAndArtifactId(selectedArtifact)) {
-                                    projectToBuild.addArtifact(selectedArtifact);
-
-                                    for(MavenProject mavenProject : projectsManager.findInheritors(currentProject)) {
-                                        MavenArtifact artifact = new MavenArtifact(mavenProject.getMavenId().getGroupId(), mavenProject.getMavenId().getArtifactId(), mavenProject.getMavenId().getVersion());
-
-                                        projectToBuild.addArtifact(artifact);
-                                    }
-                                }
-
-                            }
-                        }
-                    }
-                    settingsService.getCurrentSettings().setProjectsToBuild(projectsToBuild.stream().map(ProjectToBuildBuilder::build).collect(Collectors.toList()));
-                    updateProjectTree();
-                }
-            }
-        });
-        selectCurrentPanel.add(selectCurrentButton);
-
-        mainContent.add(configPanel, bagConstraintsBuilder().fillHorizontal().gridx(0).gridy(0).weightx(1.0).gridwidth(2).build());
+  //      mainContent.add(configPanel, bagConstraintsBuilder().fillHorizontal().gridx(0).gridy(0).weightx(1.0).gridwidth(2).build());
+        mainContent.add(configPanel2.getComponent(), bagConstraintsBuilder().fillHorizontal().gridx(0).gridy(0).weightx(1.0).gridwidth(2).build());
         mainContent.add(scrollPane, bagConstraintsBuilder().fillBoth().weightx(1.0).gridx(0).gridy(1).build());
-        mainContent.add(favoritePanel, bagConstraintsBuilder().fillVertical().weightx(0.0).weighty(1.0).gridx(1).gridy(1).build());
-        mainContent.add(selectCurrentPanel, bagConstraintsBuilder().fillHorizontal().weightx(1.0).weighty(0.0).gridx(0).gridy(2).build());
+        mainContent.add(favoritePanel.getComponent(), bagConstraintsBuilder().fillVertical().weightx(0.0).weighty(1.0).gridx(1).gridy(1).build());
+  //      mainContent.add(panel, bagConstraintsBuilder().fillHorizontal().weightx(1.0).weighty(0.0).gridx(0).gridy(2).build());
+        mainContent.add(selectCurrentPanel.getComponent(), bagConstraintsBuilder().fillHorizontal().weightx(1.0).weighty(0.0).gridx(0).gridy(2).build());
 
         toolWindowContent.setContent(mainContent);
-    }
-
-    private void createFavoritePanel() {
-        if(favoritePanel == null) {
-            favoritePanel = new JPanel();
-        }
-        else {
-            favoritePanel.removeAll();
-        }
-        favoritePanel.setLayout(new BoxLayout(favoritePanel, BoxLayout.PAGE_AXIS));
-
-        MavenExecutorService settingsService = MavenExecutorService.getInstance(project);
-
-        String currentSettings = settingsService.getCurrentSettingsLabel();
-
-        defaultSettingsButton = new JButton("DEFAULT");
-        if(currentSettings == null) {
-            defaultSettingsButton.setFont(defaultSettingsButton.getFont().deriveFont(Font.BOLD));
-        }
-        else {
-            defaultSettingsButton.setFont(defaultSettingsButton.getFont().deriveFont(Font.PLAIN));
-        }
-        defaultSettingsButton.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(currentSettings == null ? Color.GRAY : Color.LIGHT_GRAY, 1), BorderFactory.createEmptyBorder(3, 5, 3, 5)));
-        defaultSettingsButton.setMaximumSize(new Dimension(Short.MAX_VALUE, Double.valueOf(defaultSettingsButton.getMaximumSize().getHeight()).shortValue()));
-      //  defaultSettingsButton.setC
-
-        defaultSettingsButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                settingsService.loadDefaultSettings();
-
-                updateAll();
-            }
-        });
-
-        favoritePanel.add(defaultSettingsButton);
-
-        JLabel favoriteLabel = new JLabel("Favorite:", null, SwingConstants.CENTER);
-        favoriteLabel.setMaximumSize(new Dimension(Short.MAX_VALUE, Double.valueOf(favoriteLabel.getMaximumSize().getHeight()).shortValue()));
-        favoritePanel.add(favoriteLabel);
-
-        settingsService.getFavoriteSettingsNames().forEach(settingName -> {
-            JButton button = new JButton(settingName);
-
-            if(settingName.equals(currentSettings)) {
-                button.setFont(defaultSettingsButton.getFont().deriveFont(Font.BOLD));
-            }
-            else {
-                button.setFont(defaultSettingsButton.getFont().deriveFont(Font.PLAIN));
-            }
-            button.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(settingName.equals(currentSettings) ? Color.GRAY : Color.LIGHT_GRAY, 1), BorderFactory.createEmptyBorder(3, 5, 3, 5)));
-            button.setMaximumSize(new Dimension(Short.MAX_VALUE, Double.valueOf(button.getMaximumSize().getHeight()).shortValue()));
-
-
-            button.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    JButton source = (JButton)e.getSource();
-
-                    settingsService.loadSettings(button.getText());
-
-                    System.out.println(settingsService.getCurrentSettings());
-
-                    updateAll();
-                }
-            });
-
-            button.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    if(SwingUtilities.isRightMouseButton(e)) {
-                        final ActionManager actionManager = ActionManager.getInstance();
-
-                        JButton source = (JButton)e.getSource();
-                        ActionPopupMenu menu = actionManager.createActionPopupMenu("EasyMavenBuilderPanel", (DefaultActionGroup) actionManager
-                                .getAction("EasyMavenBuilder.FavoriteItemContextMenu"));
-                        menu.getComponent().show(source, JBUI.scale(-10), source.getHeight() + JBUI.scale(2));
-                    }
-                }
-            });
-
-            favoritePanel.add(button);
-        });
-
-        favoritePanel.repaint();
     }
 
     private void createConfigPanel() {
@@ -368,7 +217,7 @@ public class MavenExecutorToolWindow {
 
         runMavenButton = new JButton();
         runMavenButton.setIcon(AllIcons.General.Run);
-        runMavenButton.addActionListener(new RunMavenActionListener(project, projectsTreeView));
+        runMavenButton.addActionListener(new RunMavenActionListener(project));
         runMavenButton.setEnabled(canExecute());
 
         createGoalsSubPanel();
@@ -612,18 +461,17 @@ public class MavenExecutorToolWindow {
     }
 
     public void updateAll() {
-        updateGoals();
-        updateOptionalJvmOptions();
-        updateProfile();
+        configPanel2.update();
         updateFavorite();
-        updateOfflineOption();
-        updateAlwaysUpdateMode();
-        updateSkipTestsOption();
-        updateThreads();
         updateProjectTree();
     }
 
-    private void updateProjectTree() {
+    public void updateWithoutFavorite() {
+        configPanel2.update();
+        updateProjectTree();
+    }
+
+    public void updateProjectTree() {
         projectsTreeView.updateTree(settingsService.getCurrentSettings().getProjectsToBuild());
     }
 
@@ -650,7 +498,8 @@ public class MavenExecutorToolWindow {
     }
 
     public void updateFavorite() {
-        createFavoritePanel();
+        favoritePanel.refresh();
+     //   createFavoritePanel();
     }
 
     private void updateOptionalJvmOptions() {

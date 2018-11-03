@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Lists;
 import com.intellij.util.xmlb.annotations.Attribute;
 import com.intellij.util.xmlb.annotations.Tag;
 import com.kubicz.mavenexecutor.model.ProjectToBuild;
@@ -66,6 +67,13 @@ public class MavenExecutorSetting implements Cloneable, Serializable {
         return ListTextMapper.listAsText(jvmOptions, " ");
     }
 
+    public void goalsFromText(String goalsText) {
+        if (goalsText.isEmpty()) {
+            goals.clear();
+        } else {
+            goals = Lists.newArrayList(goalsText.split("\\s"));
+        }
+    }
 
     public MavenExecutorSetting setGoals(final List<String> goals) {
         this.goals = goals;
