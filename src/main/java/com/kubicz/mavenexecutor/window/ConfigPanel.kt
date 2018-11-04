@@ -184,7 +184,7 @@ class ConfigPanel(private var project: Project,
         val projectsManager = MavenProjectsManager.getInstance(project)
         //profiles.setItems(Lists.newArrayList(projectsManager.getAvailableProfiles()), a -> a);
         projectsManager.availableProfiles.forEach { profile -> profiles.addItem(profile, profile, settingsService.getCurrentSettings().getProfiles().contains(profile)) }
-        profiles.setCheckBoxListListener { index, value -> settingsService.currentSettings.profiles = profiles.selectedItemNames }
+        profiles.setCheckBoxListListener { _, _ -> settingsService.currentSettings.profiles = profiles.selectedItemNames }
 
         val profilesScrollPane = ScrollPaneFactory.createScrollPane(profiles)
         profilesScrollPane.maximumSize = Dimension(1000, 80)
