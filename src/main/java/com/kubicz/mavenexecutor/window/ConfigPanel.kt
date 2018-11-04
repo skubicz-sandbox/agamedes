@@ -304,7 +304,7 @@ class ConfigPanel(private var project: Project,
         optionalJvmOptionsComboBox.editor.item = settingsService.currentSettings.optionalJvmOptionsAsText()
     }
 
-    private fun updateProfile() {
+    fun updateProfile() {
         val projectsManager = MavenProjectsManager.getInstance(project)
 
         profiles.clear()

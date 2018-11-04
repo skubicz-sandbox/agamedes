@@ -11,6 +11,7 @@ import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import java.awt.*;
@@ -20,7 +21,7 @@ import java.beans.PropertyChangeListener;
 import java.util.*;
 import java.util.List;
 
-public class MavenProjectsTreeView {
+public class MavenProjectsTree {
 
     private MyCheckboxTree tree;
 
@@ -41,7 +42,23 @@ public class MavenProjectsTreeView {
         }
     };
 
-    public MavenProjectsTreeView(@NotNull MavenProjectsManager projectsManager, List<ProjectToBuild> selectedNodes) {
+    public MavenProjectsTree(@NotNull MavenProjectsManager projectsManager, List<ProjectToBuild> selectedNodes) {
+        this.tree = new MyCheckboxTree(renderer, null);
+
+        this.tree.addCheckboxTreeListener(new CheckboxTreeAdapter() {
+            @Override
+            public void nodeStateChanged(@NotNull CheckedTreeNode node) {
+                Object userObject = node.getUserObject();
+                if(node.getUserObject() instanceof ProjectRootNode) {
+                    ((ProjectRootNode)userObject).setSelected(node.isChecked());
+                }
+            }
+        });
+
+        update(projectsManager, selectedNodes);
+    }
+
+    public void update(@NotNull MavenProjectsManager projectsManager, List<ProjectToBuild> selectedNodes) {
         CheckedTreeNode root = new CheckedTreeNode(null);
         for(MavenProject mavenProject : projectsManager.getRootProjects()) {
             MavenArtifact rootMavenArtifact = toMavenArtifact(mavenProject.getMavenId());
@@ -56,25 +73,15 @@ public class MavenProjectsTreeView {
             root.add(rootProject);
 
         }
-
-        this.tree = new MyCheckboxTree(renderer, root);
+        tree.setModel(new DefaultTreeModel(root));
 
         for(int i = 0; i < this.tree.getRowCount(); ++i) {
             this.tree.expandRow(i);
         }
 
-        this.tree.addCheckboxTreeListener(new CheckboxTreeAdapter() {
-            @Override
-            public void nodeStateChanged(@NotNull CheckedTreeNode node) {
-                Object userObject = node.getUserObject();
-                if(node.getUserObject() instanceof ProjectRootNode) {
-                    ((ProjectRootNode)userObject).setSelected(node.isChecked());
-                }
-            }
-        });
     }
 
-    public void updateTree(List<ProjectToBuild> selectedNodes) {
+    public void updateTreeSelection(List<ProjectToBuild> selectedNodes) {
         CheckedTreeNode root = (CheckedTreeNode)this.tree.getModel().getRoot();
 
         int childCount = root.getChildCount();

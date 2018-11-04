@@ -11,9 +11,9 @@
 //
 //public class MavenProjectsTreeViewListener extends MavenExecutorWindowListenerAdapter {
 //
-//    private MavenProjectsTreeView treeView;
+//    private MavenProjectsTree treeView;
 //
-//    public MavenProjectsTreeViewListener(MavenExecutorSetting setting, MavenProjectsTreeView treeView) {
+//    public MavenProjectsTreeViewListener(MavenExecutorSetting setting, MavenProjectsTree treeView) {
 //        super(setting);
 //        this.treeView = treeView;
 //    }

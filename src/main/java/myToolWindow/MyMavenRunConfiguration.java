@@ -3,6 +3,7 @@ package myToolWindow;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.kubicz.mavenexecutor.window.MavenAdditionalParameters;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.idea.maven.execution.MavenRunConfiguration;
 
@@ -15,15 +16,16 @@ public class MyMavenRunConfiguration extends MavenRunConfiguration {
     public MyMavenRunConfiguration(final Project project, final ConfigurationFactory factory, final String name) {
         super(project, factory, name);
     }
-    public Map<String, String> mavenProperties =  new HashMap<>();
+    public MavenAdditionalParameters additionalParameters =  new MavenAdditionalParameters();
 
     @Override
     public JavaParameters createJavaParameters(@Nullable final Project project) throws ExecutionException {
         JavaParameters javaParameters = super.createJavaParameters(project);
 
-        mavenProperties.entrySet().forEach(entry -> {
-            javaParameters.getProgramParametersList().add(entry.getKey(), entry.getValue());
-        });
+        if(!additionalParameters.getProjects().isEmpty()) {
+            javaParameters.getProgramParametersList().add("-pl", additionalParameters.getProjects());
+        }
+
         return javaParameters;
     }
 }
