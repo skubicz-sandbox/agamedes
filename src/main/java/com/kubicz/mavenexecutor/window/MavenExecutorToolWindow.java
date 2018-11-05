@@ -63,7 +63,7 @@ public class MavenExecutorToolWindow {
         this.toolWindow = toolWindow;
         this.toolWindowContent = new SimpleToolWindowPanel(true, true);
 
-        settingsService = MavenExecutorService.getInstance(project);
+        settingsService = MavenExecutorService.Companion.getInstance(project);
 
         createWindowToolbar();
 

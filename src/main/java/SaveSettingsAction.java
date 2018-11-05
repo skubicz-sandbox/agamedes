@@ -14,7 +14,7 @@ public class SaveSettingsAction extends AnAction {
     }
 
     public void actionPerformed(AnActionEvent event) {
-        MavenExecutorService settingsService = MavenExecutorService.getInstance(event.getProject());
+        MavenExecutorService settingsService = MavenExecutorService.Companion.getInstance(event.getProject());
 
         System.out.println(settingsService.getFavoriteSettings());
 

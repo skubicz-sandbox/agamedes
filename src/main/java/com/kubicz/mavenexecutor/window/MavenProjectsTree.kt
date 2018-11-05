@@ -94,74 +94,37 @@ class MavenProjectsTree(projectsManager: MavenProjectsManager, selectedNodes: Li
         return projectRootMap
     }
 
+    fun updateTreeSelection(selectedNodes: List<ProjectToBuild>) {
+        val root = this.tree.model.root as CheckedTreeNode
+
+        val childCount = root.childCount
+
+        for (i in 0 until childCount) {
+            val childNode = root.getChildAt(i) as CheckedTreeNode
+
+            val selectedProject = selectedNodes.findProject(childNode.nodeData().mavenArtifact)
+
+            val buildEntireProject = selectedProject?.buildEntireProject() ?: false
+            if (buildEntireProject) {
+                checkedAllTreeNode(childNode)
+            } else {
+                if (childNode.isLeaf) {
+                    childNode.isChecked = selectedProject?.buildEntireProject() ?: false
+                } else {
+                    checkedSelectedTreeNode(childNode, selectedProject?.selectedModules ?: ArrayList())
+                }
+            }
+        }
+
+        tree.repaint()
+    }
+
     private fun findProjectRootNodes(model: TreeModel): List<CheckedTreeNode> {
         return findNodes(model.root as CheckedTreeNode, Predicate { it.userObject is ProjectRootNode })
-//        val nodes = ArrayList<CheckedTreeNode>()
-//        val root = model.root
-//
-//        if (root !is CheckedTreeNode) {
-//            throw IllegalStateException(
-//                    "The root must be instance of the " + CheckedTreeNode::class.java.name + ": " + root.javaClass.name)
-//        }
-//        object : Any() {
-//            fun collect(node: CheckedTreeNode) {
-//                if (node.isLeaf) {
-//                    val userObject = node.userObject
-//                    if (userObject != null && ProjectRootNode::class.java.isAssignableFrom(userObject.javaClass)) {
-//                        nodes.add(node)
-//                    }
-//                } else {
-//                    val userObject = node.userObject
-//                    if (userObject != null && ProjectRootNode::class.java.isAssignableFrom(userObject.javaClass)) {
-//                        nodes.add(node)
-//                    }
-//                    for (i in 0 until node.childCount) {
-//                        val child = node.getChildAt(i)
-//                        if (child is CheckedTreeNode) {
-//                            collect(child)
-//                        }
-//                    }
-//
-//                }
-//            }
-//        }.collect(root)
-//
-//        return nodes
     }
 
     private fun getCheckedNodes(root: CheckedTreeNode): List<Mavenize> {
         return findNodes(root, Predicate { it.isChecked }).map { it.nodeData() }
-//        val nodes = ArrayList<T>()
-//        if (root !is CheckedTreeNode) {
-//            throw IllegalStateException(
-//                    "The root must be instance of the " + CheckedTreeNode::class.java.name + ": " + root.javaClass.name)
-//        }
-//        object : Any() {
-//            fun collect(node: CheckedTreeNode) {
-//                if (node.isLeaf) {
-//                    val userObject = node.userObject
-//                    if (node.isChecked && userObject != null && nodeType.isAssignableFrom(userObject.javaClass)) {
-//                        val value = userObject as T
-//                        nodes.add(value)
-//                    }
-//                } else {
-//                    val userObject = node.userObject
-//                    if (node.isChecked && userObject != null && nodeType.isAssignableFrom(userObject.javaClass)) {
-//                        val value = userObject as T
-//                        nodes.add(value)
-//                    }
-//                    for (i in 0 until node.childCount) {
-//                        val child = node.getChildAt(i)
-//                        if (child is CheckedTreeNode) {
-//                            collect(child)
-//                        }
-//                    }
-//
-//                }
-//            }
-//        }.collect(root)
-//
-//        return nodes
     }
 
     private fun findNodes(root: CheckedTreeNode, predicate: Predicate<CheckedTreeNode>): List<CheckedTreeNode> {
@@ -186,31 +149,6 @@ class MavenProjectsTree(projectsManager: MavenProjectsManager, selectedNodes: Li
         }.collect(root)
 
         return nodes
-    }
-
-    fun updateTreeSelection(selectedNodes: List<ProjectToBuild>) {
-        val root = this.tree.model.root as CheckedTreeNode
-
-        val childCount = root.childCount
-
-        for (i in 0 until childCount) {
-            val childNode = root.getChildAt(i) as CheckedTreeNode
-
-            val selectedProject = selectedNodes.findProject(childNode.nodeData().mavenArtifact)
-
-            val buildEntireProject = selectedProject?.buildEntireProject() ?: false
-            if (buildEntireProject) {
-                checkedAllTreeNode(childNode)
-            } else {
-                if (childNode.isLeaf) {
-                    childNode.isChecked = selectedProject?.buildEntireProject() ?: false
-                } else {
-                    checkedSelectedTreeNode(childNode, selectedProject?.selectedModules ?: ArrayList())
-                }
-            }
-        }
-
-        tree.repaint()
     }
 
     private fun checkedAllTreeNode(node: CheckedTreeNode) {
