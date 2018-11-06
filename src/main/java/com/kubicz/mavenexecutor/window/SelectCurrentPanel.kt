@@ -1,7 +1,6 @@
 package com.kubicz.mavenexecutor.window
 
 import com.intellij.openapi.fileEditor.FileEditorManager
-import com.intellij.openapi.project.Project
 import com.kubicz.mavenexecutor.model.MavenArtifact
 import com.kubicz.mavenexecutor.model.MavenArtifactFactory
 import com.kubicz.mavenexecutor.model.ProjectToBuildBuilder
@@ -13,10 +12,16 @@ import javax.swing.JButton
 import javax.swing.JComponent
 import javax.swing.JPanel
 
-class SelectCurrentPanel(private var project: Project,
-                         private var parent: MavenExecutorToolWindow) {
+class SelectCurrentPanel(projectsManager: MavenProjectsManager, settingsService: MavenExecutorService,
+                         fileEditorManager: FileEditorManager, selectCurrentListener: () -> Unit) {
 
     private var panel = JPanel()
+
+    private val projectsManager = projectsManager
+
+    private val settingsService = settingsService
+
+    private val fileEditorManager = fileEditorManager
 
     private var selectCurrentButton: JButton = JButton("Select current")
 
@@ -25,6 +30,8 @@ class SelectCurrentPanel(private var project: Project,
         selectCurrentButton.maximumSize = Dimension(Integer.MAX_VALUE, selectCurrentButton.maximumSize.getHeight().toInt())
         selectCurrentButton.addActionListener {
             actionListener()
+
+            selectCurrentListener()
         }
 
         panel.add(selectCurrentButton)
@@ -34,10 +41,9 @@ class SelectCurrentPanel(private var project: Project,
         get() : JComponent = panel
 
     private fun actionListener() {
-        val projectsManager = MavenProjectsManager.getInstance(project)
-        val manager = FileEditorManager.getInstance(project)
+        val projectsManager = projectsManager
 
-        val fileEditors = manager.selectedEditors
+        val fileEditors = fileEditorManager.selectedEditors
 
         val projectsToBuild = ArrayList<ProjectToBuildBuilder>()
 
@@ -76,12 +82,10 @@ class SelectCurrentPanel(private var project: Project,
             }
         }
 
-        parent
-                .settingsService
+        settingsService
                 .currentSettings
-                .projectsToBuild = projectsToBuild.map(ProjectToBuildBuilder::build)
+                .projectsToBuild = projectsToBuild.map(ProjectToBuildBuilder::build).toMutableList()
 
-        parent.updateProjectTree()
     }
 
     private fun selectedArtifactIsNotRoot(selectedArtifact : MavenArtifact, rootArtifact : MavenArtifact) : Boolean = !rootArtifact.equalsGroupAndArtifactId(selectedArtifact)

@@ -25,7 +25,7 @@ public class SaveSettingsAction extends AnAction {
             settingsService.addSettings(saveConfirmationDialog.getSettingsName(), copySetting(settingsService.getCurrentSettings()));
             settingsService.loadSettings(saveConfirmationDialog.getSettingsName());
 
-            MavenExecutorToolWindow.getInstance(event.getProject()).updateFavorite();
+            MavenExecutorToolWindow.Companion.getInstance(event.getProject()).updateFavorite();
         }
     }
 

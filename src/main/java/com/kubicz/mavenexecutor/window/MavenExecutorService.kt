@@ -13,9 +13,10 @@ import java.util.*
 @State(name = "mavenExecutorSetting", storages = [Storage("mavenExecutorSetting.xml")])
 class MavenExecutorService : PersistentStateComponent<MavenExecutorService> {
 
-    @Tag("defaultSettings")
+    @Property
     var defaultSettings = MavenExecutorSetting()
 
+    @Property
     var currentSettingsLabel: String? = null
 
     @Property
@@ -23,6 +24,9 @@ class MavenExecutorService : PersistentStateComponent<MavenExecutorService> {
 
     @Property
     var jvmOptionHistory: History = History()
+
+    @Property
+    private var favorite = HashMap<String, MavenExecutorSetting>()
 
     val favoriteSettings: List<MavenExecutorSetting>
         get() = favorite.values.toList()
@@ -38,8 +42,6 @@ class MavenExecutorService : PersistentStateComponent<MavenExecutorService> {
     val isDefaultSettings: Boolean
         get() = currentSettingsLabel == null
 
-    @Tag("favoriteSettings")
-    private var favorite = HashMap<String, MavenExecutorSetting>()
 
     init {
     }

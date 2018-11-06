@@ -27,13 +27,13 @@ class OpenEnvironmentVariablesDialogAction : AnAction("") {
 
     }
 
-    private fun toEnvVariables(environmentProperties: Map<String, String>): List<EnvironmentVariable> {
+    private fun toEnvVariables(environmentProperties: MutableMap<String, String>): List<EnvironmentVariable> {
         return environmentProperties.entries.map { EnvironmentVariable(it.key, it.value, false) }.toList()
     }
 
 
-    private fun toEnvironmentPropertiesMap(environmentProperties: List<EnvironmentVariable>): Map<String, String> {
-        return environmentProperties.map { it.name to it.value }.toMap()
+    private fun toEnvironmentPropertiesMap(environmentProperties: List<EnvironmentVariable>): MutableMap<String, String> {
+        return environmentProperties.map { it.name to it.value }.toMap().toMutableMap()
     }
 
 }

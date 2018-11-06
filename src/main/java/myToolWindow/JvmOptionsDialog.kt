@@ -12,8 +12,8 @@ class JvmOptionsDialog(project: Project?) : DialogWrapper(project) {
 
     private var jvmOptionTextArea: JTextArea? = null
 
-    var jvmOptions: List<String>
-        get() = jvmOptionTextArea!!.text.split("\n").toList()
+    var jvmOptions: MutableList<String>
+        get() = jvmOptionTextArea!!.text.split("\n").toMutableList()
         set(jmOptions) {
             jvmOptionTextArea!!.text = jmOptions.joinToString("\n")
         }

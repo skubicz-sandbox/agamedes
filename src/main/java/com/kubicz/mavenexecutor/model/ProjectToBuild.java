@@ -1,16 +1,13 @@
 package com.kubicz.mavenexecutor.model;
 
-import com.intellij.util.xmlb.annotations.Attribute;
-import com.intellij.util.xmlb.annotations.Property;
-import com.intellij.util.xmlb.annotations.Tag;
-import com.kubicz.mavenexecutor.window.ListTextMapper;
-import org.jetbrains.annotations.NotNull;
-
-import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
+import org.jetbrains.annotations.NotNull;
+
+import com.intellij.util.xmlb.annotations.Property;
+import com.kubicz.mavenexecutor.window.ListTextMapper;
 
 public class ProjectToBuild {
 
@@ -23,7 +20,7 @@ public class ProjectToBuild {
     @Property
     private String projectDictionary;
 
-    @Tag("selectedModules")
+    @Property
     private List<MavenArtifact> selectedModules;
 
     protected ProjectToBuild() {

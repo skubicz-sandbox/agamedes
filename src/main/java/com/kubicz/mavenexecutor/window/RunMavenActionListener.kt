@@ -79,8 +79,10 @@ class RunMavenActionListener(private val project: Project) : ActionListener {
 
         mavenGeneralSettings.isWorkOffline = setting.isOfflineMode
         mavenGeneralSettings.isAlwaysUpdateSnapshots = setting.isAlwaysUpdateSnapshot
-        if (setting.threadCount != null && setting.threadCount > 0) {
-            mavenGeneralSettings.threads = setting.threadCount!!.toString()
+        setting.threadCount?.let {
+            if (it > 0) {
+                mavenGeneralSettings.threads = it.toString()
+            }
         }
 
         val projectsManager = MavenProjectsManager.getInstance(project)

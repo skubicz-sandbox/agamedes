@@ -51,10 +51,10 @@ class MavenProjectsTree(projectsManager: MavenProjectsManager, selectedNodes: Li
             }
         })
 
-        update(projectsManager, selectedNodes)
+        update(selectedNodes)
     }
 
-    fun update(projectsManager: MavenProjectsManager, selectedNodes: List<ProjectToBuild>) {
+    fun update(selectedNodes: List<ProjectToBuild>) {
         val root = CheckedTreeNode(null)
         for (mavenProject in projectsManager.rootProjects) {
             val rootMavenArtifact = MavenArtifactFactory.from(mavenProject.mavenId)

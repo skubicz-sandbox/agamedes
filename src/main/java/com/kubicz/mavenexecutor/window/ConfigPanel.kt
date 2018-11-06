@@ -21,8 +21,10 @@ import java.awt.event.FocusAdapter
 import java.awt.event.FocusEvent
 import javax.swing.*
 
-class ConfigPanel(private var project: Project,
-                  private var parentComponent: MavenExecutorToolWindow) {
+class ConfigPanel(project: Project,
+                  settingsService: MavenExecutorService) {
+
+    private val project = project;
 
     private var panel = JPanel()
 
@@ -52,7 +54,7 @@ class ConfigPanel(private var project: Project,
 
     private var profiles: CustomCheckBoxList = CustomCheckBoxList()
 
-    private var settingsService: MavenExecutorService = parentComponent.settingsService
+    private val settingsService = settingsService
 
     private val setHistory: ComboBox<String>.(History) -> Unit = {history -> model = DefaultComboBoxModel<String>(history.asArray())}
 
@@ -165,8 +167,8 @@ class ConfigPanel(private var project: Project,
 
         threadsTextField.columns = 2
         threadsTextField.isCanBeEmpty = true
-        if (settingsService.currentSettings.threadCount != null) {
-            threadsTextField.value = settingsService.currentSettings.threadCount
+        settingsService.currentSettings.threadCount?.let {
+            threadsTextField.value = it
         }
         threadsTextField.addCaretListener {
             try {
@@ -183,7 +185,7 @@ class ConfigPanel(private var project: Project,
 
         val projectsManager = MavenProjectsManager.getInstance(project)
         //profiles.setItems(Lists.newArrayList(projectsManager.getAvailableProfiles()), a -> a);
-        projectsManager.availableProfiles.forEach { profile -> profiles.addItem(profile, profile, settingsService.currentSettings.getProfiles().contains(profile)) }
+        projectsManager.availableProfiles.forEach { profile -> profiles.addItem(profile, profile, settingsService.currentSettings.profiles.contains(profile)) }
         profiles.setCheckBoxListListener { _, _ -> settingsService.currentSettings.profiles = profiles.selectedItemNames }
 
         val profilesScrollPane = ScrollPaneFactory.createScrollPane(profiles)

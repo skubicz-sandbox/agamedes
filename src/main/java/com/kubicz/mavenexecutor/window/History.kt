@@ -4,8 +4,10 @@ import com.intellij.util.xmlb.annotations.Property
 import java.io.Serializable
 
 class History {
+
     @Property
     private var maxItemsCount: Int = 20
+
     @Property
     var items: MutableList<String> = arrayListOf()
 

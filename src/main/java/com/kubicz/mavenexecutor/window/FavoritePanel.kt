@@ -10,10 +10,11 @@ import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import javax.swing.*
 
-class FavoritePanel(private var project: Project,
-                    private var parentComponent: MavenExecutorToolWindow) {
+class FavoritePanel(settingsService: MavenExecutorService, changeSettingListener: () -> Unit) {
 
     private var panel = JPanel()
+
+    private val settingsService = settingsService;
 
     private var defaultSettingsButton = JButton("DEFAULT")
 
@@ -27,15 +28,15 @@ class FavoritePanel(private var project: Project,
             val button = (it.source as JButton)
 
             if(button.isDefault()) {
-                parentComponent.settingsService.loadDefaultSettings()
+                settingsService.loadDefaultSettings()
             }
             else {
-                parentComponent.settingsService.loadSettings(button.text)
+                settingsService.loadSettings(button.text)
             }
 
             refreshSelection()
 
-            parentComponent.updateWithoutFavorite()
+            changeSettingListener()
         }
     }
 
@@ -55,13 +56,12 @@ class FavoritePanel(private var project: Project,
         panel.repaint()
     }
 
-
     private fun initComponents() {
         panel.layout = BoxLayout(panel, BoxLayout.PAGE_AXIS)
 
-        val currentSettingsLabel = parentComponent.settingsService.currentSettingsLabel
+        val currentSettingsLabel = settingsService.currentSettingsLabel
 
-        val isDefaultSettingsSelected = parentComponent.settingsService.isDefaultSettings
+        val isDefaultSettingsSelected = settingsService.isDefaultSettings
 
         defaultSettingsButton.name = "default"
         defaultSettingsButton.init(isDefaultSettingsSelected)
@@ -72,7 +72,7 @@ class FavoritePanel(private var project: Project,
         favoriteLabel.maximumSize = Dimension(Integer.MAX_VALUE, favoriteLabel.maximumSize.getHeight().toInt())
         panel.add(favoriteLabel)
 
-        parentComponent.settingsService.favoriteSettingsNames.forEach { settingName ->
+        settingsService.favoriteSettingsNames.forEach { settingName ->
             val button = JButton(settingName)
 
             button.init(settingName == currentSettingsLabel)
@@ -98,10 +98,10 @@ class FavoritePanel(private var project: Project,
         panel.components.forEach {
             if (it is JButton) {
                 if(it.isDefault()) {
-                    it.background = color(parentComponent.settingsService.isDefaultSettings)
+                    it.background = color(settingsService.isDefaultSettings)
                 }
                 else {
-                    it.background = color(parentComponent.settingsService.currentSettingsLabel == it.text)
+                    it.background = color(settingsService.currentSettingsLabel == it.text)
                 }
             }
         }

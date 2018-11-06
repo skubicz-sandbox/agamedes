@@ -9,7 +9,7 @@ import com.intellij.ui.CheckBoxList
 
 class CustomCheckBoxList : CheckBoxList<String>() {
 
-    val selectedItemNames: List<String>
+    val selectedItemNames: MutableList<String>
         get() {
             val selectedItems = ArrayList<String>()
 
