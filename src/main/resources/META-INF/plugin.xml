@@ -26,10 +26,10 @@
         <configurationType implementation="myToolWindow.MyMavenRunConfigurationType"/>
 
         <toolWindow id="Maven Executor" secondary="true" icon="/myToolWindow/plus.png" anchor="right"
-            factoryClass="com.kubicz.mavenexecutor.window.MavenExecutorToolWindowFactory" />
+            factoryClass="org.kubicz.mavenexecutor.view.window.MavenExecutorToolWindowFactory" />
 
-        <projectService serviceImplementation="com.kubicz.mavenexecutor.window.MavenExecutorToolWindow"/>
-        <projectService serviceImplementation="com.kubicz.mavenexecutor.window.MavenExecutorService"/>
+        <projectService serviceImplementation="org.kubicz.mavenexecutor.view.window.MavenExecutorToolWindow"/>
+        <projectService serviceImplementation="org.kubicz.mavenexecutor.view.window.MavenExecutorService"/>
     </extensions>
 
     <actions>

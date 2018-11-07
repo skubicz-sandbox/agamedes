@@ -4,7 +4,7 @@ import com.intellij.execution.ExecutionException
 import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.execution.configurations.JavaParameters
 import com.intellij.openapi.project.Project
-import com.kubicz.mavenexecutor.window.MavenAdditionalParameters
+import org.kubicz.mavenexecutor.view.window.MavenAdditionalParameters
 import org.jetbrains.idea.maven.execution.MavenRunConfiguration
 
 class MyMavenRunConfiguration(project: Project, factory: ConfigurationFactory, name: String) : MavenRunConfiguration(project, factory, name) {

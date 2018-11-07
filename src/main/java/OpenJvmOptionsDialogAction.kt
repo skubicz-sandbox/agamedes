@@ -1,6 +1,6 @@
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.kubicz.mavenexecutor.window.MavenExecutorService
+import org.kubicz.mavenexecutor.view.window.MavenExecutorService
 import myToolWindow.JvmOptionsDialog
 
 

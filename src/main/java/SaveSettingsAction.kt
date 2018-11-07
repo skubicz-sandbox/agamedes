@@ -1,9 +1,9 @@
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.util.xmlb.XmlSerializerUtil
-import com.kubicz.mavenexecutor.window.MavenExecutorService
-import com.kubicz.mavenexecutor.model.settings.ExecutionSettings
-import com.kubicz.mavenexecutor.window.MavenExecutorToolWindow
+import org.kubicz.mavenexecutor.view.window.MavenExecutorService
+import org.kubicz.mavenexecutor.model.settings.ExecutionSettings
+import org.kubicz.mavenexecutor.view.window.MavenExecutorToolWindow
 import myToolWindow.SaveConfirmationDialog
 
 class SaveSettingsAction : AnAction("") {

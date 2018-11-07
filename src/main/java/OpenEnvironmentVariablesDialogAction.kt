@@ -3,7 +3,7 @@ import com.intellij.execution.util.EnvironmentVariable
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.ui.DialogBuilder
-import com.kubicz.mavenexecutor.window.MavenExecutorService
+import org.kubicz.mavenexecutor.view.window.MavenExecutorService
 
 
 class OpenEnvironmentVariablesDialogAction : AnAction("") {

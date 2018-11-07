@@ -1,6 +1,6 @@
 package com.kubicz.mavenexecutor
 
-import com.kubicz.mavenexecutor.model.settings.History
+import org.kubicz.mavenexecutor.model.settings.History
 import org.junit.Test
 
 class HistoryTest {
