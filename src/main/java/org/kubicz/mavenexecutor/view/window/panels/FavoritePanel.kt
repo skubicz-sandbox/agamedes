@@ -21,7 +21,9 @@ class FavoritePanel(settingsService: MavenExecutorService, changeSettingListener
     private val isDefault: JButton.() -> Boolean = {name == "default"}
 
     private val init: JButton.(Boolean) -> Unit = {selected ->
-        background = color(selected)
+   //     background = color(selected)
+        putClientProperty("JButton.backgroundColor", color(selected))
+
         maximumSize = Dimension(Integer.MAX_VALUE, maximumSize.getHeight().toInt())
 
         addActionListener{
@@ -37,6 +39,7 @@ class FavoritePanel(settingsService: MavenExecutorService, changeSettingListener
             refreshSelection()
 
             changeSettingListener()
+
         }
     }
 
@@ -85,7 +88,6 @@ class FavoritePanel(settingsService: MavenExecutorService, changeSettingListener
                 }
             })
 
-            println(button.background)
             panel.add(button)
         }
 
@@ -93,14 +95,23 @@ class FavoritePanel(settingsService: MavenExecutorService, changeSettingListener
 
     private fun color(selected: Boolean): Color {
         var defaultColor = UIManager.getColor("Button.background")
-        return if(selected) brighter(defaultColor) else defaultColor
+        return if(selected) {
+            if(defaultColor.blue < 100) {
+                brighter(defaultColor)
+            }
+            else {
+                darker(defaultColor)
+            }
+        } else {
+            defaultColor
+        }
      //   return if(selected) Color(200, 200, 200) else Color(227, 227, 227)
     }//javax.swing.plaf.ColorUIResource[r=60,g=63,b=65]
 
     fun darker(color: Color): Color {
-        return Color(Math.max((color.red * 0.9).toInt(), 0),
-                Math.max((color.green * 0.9).toInt(), 0),
-                Math.max((color.blue * 0.9).toInt(), 0),
+        return Color(Math.max((color.red * 0.8).toInt(), 0),
+                Math.max((color.green * 0.8).toInt(), 0),
+                Math.max((color.blue * 0.8).toInt(), 0),
                 color.alpha)
     }
 
@@ -110,7 +121,7 @@ class FavoritePanel(settingsService: MavenExecutorService, changeSettingListener
         var b = color.blue
         val alpha = color.alpha
 
-        var FACTOR = 0.7
+        var FACTOR = 0.8
         /* From 2D group:
          * 1. black.brighter() should return grey
          * 2. applying brighter to blue will always return blue, brighter
@@ -134,11 +145,14 @@ class FavoritePanel(settingsService: MavenExecutorService, changeSettingListener
         panel.components.forEach {
             if (it is JButton) {
                 if(it.isDefault()) {
-                    it.background = color(settingsService.isDefaultSettings)
+               //     it.background = color(settingsService.isDefaultSettings)
+                    it.putClientProperty("JButton.backgroundColor", color(settingsService.isDefaultSettings))
                 }
                 else {
-                    it.background = color(settingsService.currentSettingsLabel == it.text)
+              //      it.background = color(settingsService.currentSettingsLabel == it.text)
+                    it.putClientProperty("JButton.backgroundColor", color(settingsService.currentSettingsLabel == it.text))
                 }
+                it.repaint()
             }
         }
     }
