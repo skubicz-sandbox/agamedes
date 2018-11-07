@@ -1,4 +1,4 @@
-package com.kubicz.mavenexecutor
+package org.kubicz.mavenexecutor
 
 import org.kubicz.mavenexecutor.model.settings.History
 import org.junit.Test

@@ -1,4 +1,4 @@
-package myToolWindow
+package org.kubicz.mavenexecutor.runconfiguration
 
 import com.intellij.compiler.options.CompileStepBeforeRun
 import com.intellij.compiler.options.CompileStepBeforeRunNoErrorCheck
@@ -28,19 +28,19 @@ import org.jetbrains.idea.maven.project.MavenProjectsManager
 import org.jetbrains.idea.maven.utils.MavenUtil
 import javax.swing.Icon
 
-class MyMavenRunConfigurationType internal constructor() : ConfigurationType {
+class MavenExecutorRunConfigurationType internal constructor() : ConfigurationType {
 
     private val myFactory = object : ConfigurationFactory(this) {
         override fun createTemplateConfiguration(project: Project): RunConfiguration {
-            return MyMavenRunConfiguration(project, this, "")
+            return MavenExecutorRunConfiguration(project, this, "")
         }
 
         override fun createTemplateConfiguration(project: Project, runManager: RunManager): RunConfiguration {
-            return MyMavenRunConfiguration(project, this, "")
+            return MavenExecutorRunConfiguration(project, this, "")
         }
 
         override fun createConfiguration(name: String, template: RunConfiguration): RunConfiguration {
-            val cfg = super.createConfiguration(name, template) as MyMavenRunConfiguration
+            val cfg = super.createConfiguration(name, template) as MavenExecutorRunConfiguration
             if (!StringUtil.isEmptyOrSpaces(cfg.runnerParameters.workingDirPath)) {
                 return cfg
             } else {
@@ -84,14 +84,14 @@ class MyMavenRunConfigurationType internal constructor() : ConfigurationType {
     }
 
     override fun getId(): String {
-        return "MyMavenRunConfigurationType"
+        return this.javaClass.name
     }
 
     companion object {
         private val MAX_NAME_LENGTH = 40
 
-        val instance: MyMavenRunConfigurationType
-            get() = ConfigurationTypeUtil.findConfigurationType(MyMavenRunConfigurationType::class.java)
+        val instance: MavenExecutorRunConfigurationType
+            get() = ConfigurationTypeUtil.findConfigurationType(MavenExecutorRunConfigurationType::class.java)
 
         fun generateName(project: Project, runnerParameters: MavenRunnerParameters): String {
             val stringBuilder = StringBuilder()
@@ -162,8 +162,8 @@ class MyMavenRunConfigurationType internal constructor() : ConfigurationType {
                                                  runnerSettings: MavenRunnerSettings?, params: MavenRunnerParameters, project: Project): RunnerAndConfigurationSettings {
             val settings = RunManager.getInstance(project)
                     .createRunConfiguration(generateName(project, params), ConfigurationTypeUtil
-                            .findConfigurationType(MyMavenRunConfigurationType::class.java).myFactory)
-            val runConfiguration = settings.configuration as MyMavenRunConfiguration
+                            .findConfigurationType(MavenExecutorRunConfigurationType::class.java).myFactory)
+            val runConfiguration = settings.configuration as MavenExecutorRunConfiguration
             runConfiguration.runnerParameters = params
             runConfiguration.generalSettings = generalSettings
             runConfiguration.runnerSettings = runnerSettings

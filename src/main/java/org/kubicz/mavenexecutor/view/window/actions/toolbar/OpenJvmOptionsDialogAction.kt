@@ -1,3 +1,5 @@
+package org.kubicz.mavenexecutor.view.window.actions.toolbar
+
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import org.kubicz.mavenexecutor.view.window.MavenExecutorService

@@ -1,4 +1,4 @@
-package org.kubicz.mavenexecutor.view.components
+package org.kubicz.mavenexecutor.view.window.panels
 
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.RunManagerEx
@@ -10,8 +10,8 @@ import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.openapi.project.Project
 import org.kubicz.mavenexecutor.model.settings.ExecutionSettings
 import org.kubicz.mavenexecutor.model.settings.ProjectToBuild
-import myToolWindow.MyMavenRunConfiguration
-import myToolWindow.MyMavenRunConfigurationType
+import org.kubicz.mavenexecutor.runconfiguration.MavenExecutorRunConfiguration
+import org.kubicz.mavenexecutor.runconfiguration.MavenExecutorRunConfigurationType
 import org.jetbrains.idea.maven.execution.MavenRunnerParameters
 import org.jetbrains.idea.maven.execution.MavenRunnerSettings
 import org.jetbrains.idea.maven.project.MavenGeneralSettings
@@ -27,7 +27,7 @@ class RunMavenActionListener(private val project: Project) : ActionListener {
     override fun actionPerformed(event: ActionEvent) {
         val settings = MavenExecutorService.getInstance(project).currentSettings
 
-        val runConfigurationType = ConfigurationTypeUtil.findConfigurationType(MyMavenRunConfigurationType::class.java)
+        val runConfigurationType = ConfigurationTypeUtil.findConfigurationType(MavenExecutorRunConfigurationType::class.java)
 
         settings.projectsToBuild.forEach { projectToBuild ->
             val runnerAndConfigurationSettings = RunManagerEx.getInstanceEx(project)
@@ -35,7 +35,7 @@ class RunMavenActionListener(private val project: Project) : ActionListener {
 
             runnerAndConfigurationSettings.isActivateToolWindowBeforeRun = true
 
-            val runConfiguration = runnerAndConfigurationSettings.configuration as MyMavenRunConfiguration
+            val runConfiguration = runnerAndConfigurationSettings.configuration as MavenExecutorRunConfiguration
 
             runConfiguration.runnerSettings = mavenRunnerSettings(settings)
             runConfiguration.generalSettings = mavenGeneralSettings(settings)

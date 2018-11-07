@@ -1,14 +1,19 @@
-package org.kubicz.mavenexecutor.view.components
+package org.kubicz.mavenexecutor.view.window.panels
 
-import com.intellij.ui.*
+import com.intellij.ui.CheckboxTreeListener
+import com.intellij.ui.CheckedTreeNode
+import com.intellij.ui.JBColor
+import com.intellij.ui.SimpleTextAttributes
+import org.jetbrains.idea.maven.project.MavenProject
+import org.jetbrains.idea.maven.project.MavenProjectsManager
 import org.kubicz.mavenexecutor.model.MavenArtifact
 import org.kubicz.mavenexecutor.model.settings.MavenArtifactFactory
 import org.kubicz.mavenexecutor.model.settings.ProjectToBuild
 import org.kubicz.mavenexecutor.model.tree.Mavenize
 import org.kubicz.mavenexecutor.model.tree.ProjectModuleNode
 import org.kubicz.mavenexecutor.model.tree.ProjectRootNode
-import org.jetbrains.idea.maven.project.MavenProject
-import org.jetbrains.idea.maven.project.MavenProjectsManager
+import org.kubicz.mavenexecutor.view.components.CheckboxTree
+import org.kubicz.mavenexecutor.view.components.CheckboxTreeBase
 import java.util.*
 import java.util.function.Predicate
 import javax.swing.JTree
@@ -18,7 +23,7 @@ import javax.swing.tree.TreeModel
 
 class MavenProjectsTree(projectsManager: MavenProjectsManager, selectedNodes: List<ProjectToBuild>) {
 
-    private val tree: MyCheckboxTree
+    private val tree: CheckboxTree
 
     private val projectsManager = projectsManager
 
@@ -32,7 +37,7 @@ class MavenProjectsTree(projectsManager: MavenProjectsManager, selectedNodes: Li
 
     private val nodeData: CheckedTreeNode.() -> Mavenize = { userObject as Mavenize }
 
-    private val renderer = object : MyCheckboxTreeBase.CheckboxTreeCellRendererBase() {
+    private val renderer = object : CheckboxTreeBase.CheckboxTreeCellRendererBase() {
         override fun customizeRenderer(tree: JTree, value: Any, selected: Boolean, expanded: Boolean, leaf: Boolean, row: Int, hasFocus: Boolean) {
             var userObject = (value as DefaultMutableTreeNode).userObject
 
@@ -48,7 +53,7 @@ class MavenProjectsTree(projectsManager: MavenProjectsManager, selectedNodes: Li
         get() = tree
 
     init {
-        this.tree = MyCheckboxTree(renderer, null)
+        this.tree = CheckboxTree(renderer, null)
 
         update(selectedNodes)
     }

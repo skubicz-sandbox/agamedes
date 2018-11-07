@@ -17,7 +17,6 @@ import org.kubicz.mavenexecutor.model.settings.History
 import org.kubicz.mavenexecutor.view.components.CustomCheckBoxList
 import org.kubicz.mavenexecutor.view.window.GridBagConstraintsBuilder
 import org.kubicz.mavenexecutor.view.window.MavenExecutorService
-import org.kubicz.mavenexecutor.view.components.RunMavenActionListener
 import org.jetbrains.idea.maven.execution.MavenArgumentsCompletionProvider
 import org.jetbrains.idea.maven.project.MavenProjectsManager
 import java.awt.Dimension

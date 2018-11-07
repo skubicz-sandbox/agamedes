@@ -3,7 +3,7 @@ package org.kubicz.mavenexecutor.view.components
 import com.intellij.ui.CheckedTreeNode
 import com.intellij.ui.TreeSpeedSearch
 
-class MyCheckboxTree(cellRenderer: CheckboxTreeCellRendererBase, root: CheckedTreeNode?) : MyCheckboxTreeBase(cellRenderer, root) {
+class CheckboxTree(cellRenderer: CheckboxTreeCellRendererBase, root: CheckedTreeNode?) : CheckboxTreeBase(cellRenderer, root) {
 
     init {
 

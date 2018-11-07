@@ -15,14 +15,14 @@ import javax.swing.tree.DefaultTreeModel
 import javax.swing.tree.TreeCellRenderer
 
 @Suppress("UNUSED_PARAMETER")
-open class MyCheckboxTreeBase @JvmOverloads constructor(cellRenderer: CheckboxTreeCellRendererBase = CheckboxTreeCellRendererBase(), root: CheckedTreeNode? = null, checkPolicy: CheckPolicy = MyCheckboxTreeHelper.DEFAULT_POLICY) : Tree() {
+open class CheckboxTreeBase @JvmOverloads constructor(cellRenderer: CheckboxTreeCellRendererBase = CheckboxTreeCellRendererBase(), root: CheckedTreeNode? = null, checkPolicy: CheckPolicy = CheckboxTreeHelper.DEFAULT_POLICY) : Tree() {
 
-    private val myHelper: MyCheckboxTreeHelper
+    private val helper: CheckboxTreeHelper
 
     private val myEventDispatcher = EventDispatcher.create(CheckboxTreeListener::class.java)
 
     init {
-        myHelper = MyCheckboxTreeHelper(checkPolicy, myEventDispatcher)
+        helper = CheckboxTreeHelper(checkPolicy, myEventDispatcher)
         if (root != null) {
             model = DefaultTreeModel(root)
             setSelectionRow(0)
@@ -33,14 +33,14 @@ open class MyCheckboxTreeBase @JvmOverloads constructor(cellRenderer: CheckboxTr
             }
 
             override fun nodeStateChanged(node: CheckedTreeNode) {
-                this@MyCheckboxTreeBase.onNodeStateChanged(node)
+                this@CheckboxTreeBase.onNodeStateChanged(node)
             }
 
             override fun beforeNodeStateChanged(node: CheckedTreeNode) {
-                this@MyCheckboxTreeBase.nodeStateWillChange(node)
+                this@CheckboxTreeBase.nodeStateWillChange(node)
             }
         })
-        myHelper.initTree(this, this, cellRenderer)
+        helper.initTree(this, this, cellRenderer)
     }
 
     fun addCheckboxTreeListener(listener: CheckboxTreeListener) {
@@ -48,7 +48,7 @@ open class MyCheckboxTreeBase @JvmOverloads constructor(cellRenderer: CheckboxTr
     }
 
     fun setNodeState(node: CheckedTreeNode, checked: Boolean) {
-        myHelper.setNodeState(this, node, checked)
+        helper.setNodeState(this, node, checked)
     }
 
     protected fun onDoubleClick(node: CheckedTreeNode) {}

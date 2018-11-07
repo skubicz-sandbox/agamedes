@@ -17,9 +17,9 @@ import javax.swing.JComponent
 import javax.swing.tree.TreeNode
 import javax.swing.tree.TreePath
 
-class MyCheckboxTreeHelper(private val myCheckPolicy: MyCheckboxTreeBase.CheckPolicy, private val myEventDispatcher: EventDispatcher<CheckboxTreeListener>) {
+class CheckboxTreeHelper(private val checkPolicy: CheckboxTreeBase.CheckPolicy, private val myEventDispatcher: EventDispatcher<CheckboxTreeListener>) {
 
-    fun initTree(tree: Tree, mainComponent: JComponent, cellRenderer: MyCheckboxTreeBase.CheckboxTreeCellRendererBase) {
+    fun initTree(tree: Tree, mainComponent: JComponent, cellRenderer: CheckboxTreeBase.CheckboxTreeCellRendererBase) {
         removeTreeListeners(mainComponent)
         tree.cellRenderer = cellRenderer
         tree.isRootVisible = false
@@ -51,7 +51,7 @@ class MyCheckboxTreeHelper(private val myCheckPolicy: MyCheckboxTreeBase.CheckPo
 
     private fun adjustParentsAndChildren(node: CheckedTreeNode, checked: Boolean) {
         if (!checked) {
-            if (myCheckPolicy.uncheckParentWithUncheckedChild) {
+            if (checkPolicy.uncheckParentWithUncheckedChild) {
                 var parent: TreeNode? = node.parent
                 while (parent != null) {
                     if (parent is CheckedTreeNode) {
@@ -60,15 +60,15 @@ class MyCheckboxTreeHelper(private val myCheckPolicy: MyCheckboxTreeBase.CheckPo
                     parent = parent.parent
                 }
             }
-            if (myCheckPolicy.uncheckChildrenWithUncheckedParent) {
+            if (checkPolicy.uncheckChildrenWithUncheckedParent) {
                 uncheckChildren(node)
             }
         } else {
-            if (myCheckPolicy.checkChildrenWithCheckedParent) {
+            if (checkPolicy.checkChildrenWithCheckedParent) {
                 checkChildren(node)
             }
 
-            if (myCheckPolicy.checkParentWithCheckedChild) {
+            if (checkPolicy.checkParentWithCheckedChild) {
                 var parent: TreeNode? = node.parent
                 while (parent != null) {
                     if (parent is CheckedTreeNode) {
@@ -162,7 +162,7 @@ class MyCheckboxTreeHelper(private val myCheckPolicy: MyCheckboxTreeBase.CheckPo
         return listener
     }
 
-    private fun setupMouseListener(tree: Tree, mainComponent: JComponent, cellRenderer: MyCheckboxTreeBase.CheckboxTreeCellRendererBase): ClickListener {
+    private fun setupMouseListener(tree: Tree, mainComponent: JComponent, cellRenderer: CheckboxTreeBase.CheckboxTreeCellRendererBase): ClickListener {
         val listener = object : ClickListener() {
             override fun onClick(e: MouseEvent, clickCount: Int): Boolean {
                 val row = tree.getRowForLocation(e.x, e.y)
@@ -199,7 +199,7 @@ class MyCheckboxTreeHelper(private val myCheckPolicy: MyCheckboxTreeBase.CheckPo
     companion object {
 
         private val TREE_LISTENERS_REMOVER = Key.create<Runnable>("TREE_LISTENERS_REMOVER")
-        val DEFAULT_POLICY = MyCheckboxTreeBase.CheckPolicy(true, true, false, true)
+        val DEFAULT_POLICY = CheckboxTreeBase.CheckPolicy(true, true, false, true)
 
         fun isToggleEvent(e: KeyEvent, mainComponent: JComponent): Boolean {
             return e.keyCode == KeyEvent.VK_SPACE && SpeedSearchSupply.getSupply(mainComponent) == null

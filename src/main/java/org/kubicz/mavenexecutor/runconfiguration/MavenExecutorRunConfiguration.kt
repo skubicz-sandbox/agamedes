@@ -1,4 +1,4 @@
-package myToolWindow
+package org.kubicz.mavenexecutor.runconfiguration
 
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.configurations.ConfigurationFactory
@@ -7,7 +7,7 @@ import com.intellij.openapi.project.Project
 import org.kubicz.mavenexecutor.view.window.MavenAdditionalParameters
 import org.jetbrains.idea.maven.execution.MavenRunConfiguration
 
-class MyMavenRunConfiguration(project: Project, factory: ConfigurationFactory, name: String) : MavenRunConfiguration(project, factory, name) {
+class MavenExecutorRunConfiguration(project: Project, factory: ConfigurationFactory, name: String) : MavenRunConfiguration(project, factory, name) {
 
     var additionalParameters = MavenAdditionalParameters()
 

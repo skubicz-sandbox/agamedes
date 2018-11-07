@@ -7,7 +7,6 @@ import org.kubicz.mavenexecutor.model.tree.Mavenize
 import org.kubicz.mavenexecutor.model.tree.ProjectRootNode
 import org.kubicz.mavenexecutor.model.settings.ProjectToBuild
 import org.kubicz.mavenexecutor.view.window.MavenExecutorService
-import org.kubicz.mavenexecutor.view.components.MavenProjectsTree
 import org.jetbrains.idea.maven.project.MavenProjectsManager
 import javax.swing.JComponent
 

@@ -23,7 +23,7 @@
     <depends>org.jetbrains.idea.maven</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <configurationType implementation="myToolWindow.MyMavenRunConfigurationType"/>
+        <configurationType implementation="org.kubicz.mavenexecutor.runconfiguration.MavenExecutorRunConfigurationType"/>
 
         <toolWindow id="Maven Executor" secondary="true" icon="/myToolWindow/plus.png" anchor="right"
             factoryClass="org.kubicz.mavenexecutor.view.window.MavenExecutorToolWindowFactory" />
@@ -35,36 +35,36 @@
     <actions>
         <group id="EasyMavenBuilder.FavoriteItemContextMenu">
             <action id="EasyMavenBuilder.RemoveFavorite"
-                    class="RemoveFavoriteAction"
+                    class="org.kubicz.mavenexecutor.view.window.actions.favorite.RemoveFavoriteAction"
                     text="Remove" />
         </group>
 
         <group id="EasyMavenBuilder.ActionsToolbar">
             <action id="EasyMavenBuilder.MavenReimport"
                 icon="AllIcons.Actions.Refresh"
-                class="MavenReimportAction"
+                class="org.kubicz.mavenexecutor.view.window.actions.toolbar.MavenReimportAction"
                 text="Reimport All Maven Projects" />
 
             <separator/>
 
             <action id="EasyMavenBuilder.JvmOptionsDialog"
                 icon="AllIcons.General.GearPlain"
-                class="OpenJvmOptionsDialogAction"
+                class="org.kubicz.mavenexecutor.view.window.actions.toolbar.OpenJvmOptionsDialogAction"
                 text="Jvm Options" />
 
             <action id="EasyMavenBuilder.OpenEnvironmentVariablesDialog"
                 icon="AllIcons.Javaee.WebServiceClient"
-                class="OpenEnvironmentVariablesDialogAction"
+                class="org.kubicz.mavenexecutor.view.window.actions.toolbar.OpenEnvironmentVariablesDialogAction"
                 text="Environment Variables" />
 
             <action id="EasyMavenBuilder.OpenMavenSettings"
-                class="OpenMavenSettingsAction" text="Maven Settings"
+                class="org.kubicz.mavenexecutor.view.window.actions.toolbar.OpenMavenSettingsAction" text="Maven Settings"
                 description="Edit Maven integration settings for the current project"
                 icon="AllIcons.General.ProjectSettings">
             </action>
 
             <action id="EasyMavenBuilder.SaveSettings"
-                    class="SaveSettingsAction" text="Save Settings"
+                    class="org.kubicz.mavenexecutor.view.window.actions.toolbar.SaveSettingsAction" text="Save Settings"
                     description="Edit Maven integration settings for the current project"
                     icon="AllIcons.Actions.Menu_saveall">
             </action>
@@ -72,7 +72,7 @@
 
         <action id="EasyMavenBuilder.RunMaven"
                 icon="AllIcons.General.Run"
-                class="MavenReimportAction"
+                class="org.kubicz.mavenexecutor.view.window.actions.toolbar.MavenReimportAction"
                 text="Reimport All Maven Projects" />
 
     </actions>

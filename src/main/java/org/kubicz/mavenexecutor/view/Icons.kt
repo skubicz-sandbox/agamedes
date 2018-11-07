@@ -1,4 +1,4 @@
-package myToolWindow
+package org.kubicz.mavenexecutor.view
 
 import com.intellij.openapi.util.IconLoader
 

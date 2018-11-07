@@ -1,3 +1,5 @@
+package org.kubicz.mavenexecutor.view.window.actions.toolbar
+
 import com.intellij.execution.util.EnvVariablesTable
 import com.intellij.execution.util.EnvironmentVariable
 import com.intellij.openapi.actionSystem.AnAction
