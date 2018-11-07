@@ -25,7 +25,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <configurationType implementation="org.kubicz.mavenexecutor.runconfiguration.MavenExecutorRunConfigurationType"/>
 
-        <toolWindow id="Maven Executor" secondary="true" icon="/myToolWindow/plus.png" anchor="right"
+        <toolWindow id="Maven Executor" secondary="true" icon="/icons/executorLogo.png" anchor="right"
             factoryClass="org.kubicz.mavenexecutor.view.window.MavenExecutorToolWindowFactory" />
 
         <projectService serviceImplementation="org.kubicz.mavenexecutor.view.window.MavenExecutorToolWindow"/>
@@ -48,12 +48,12 @@
             <separator/>
 
             <action id="EasyMavenBuilder.JvmOptionsDialog"
-                icon="/myToolWindow/jvm16x16.png"
+                icon="/icons/jvmOptions.png"
                 class="org.kubicz.mavenexecutor.view.window.actions.toolbar.OpenJvmOptionsDialogAction"
                 text="Jvm Options" />
 
             <action id="EasyMavenBuilder.OpenEnvironmentVariablesDialog"
-                icon="/myToolWindow/env_var16x16.png"
+                icon="/icons/environmentVariables.png"
                 class="org.kubicz.mavenexecutor.view.window.actions.toolbar.OpenEnvironmentVariablesDialogAction"
                 text="Environment Variables" />
 

@@ -85,13 +85,49 @@ class FavoritePanel(settingsService: MavenExecutorService, changeSettingListener
                 }
             })
 
+            println(button.background)
             panel.add(button)
         }
 
     }
 
     private fun color(selected: Boolean): Color {
-        return if(selected) Color(200, 200, 200) else Color(227, 227, 227)
+        var defaultColor = UIManager.getColor("Button.background")
+        return if(selected) brighter(defaultColor) else defaultColor
+     //   return if(selected) Color(200, 200, 200) else Color(227, 227, 227)
+    }//javax.swing.plaf.ColorUIResource[r=60,g=63,b=65]
+
+    fun darker(color: Color): Color {
+        return Color(Math.max((color.red * 0.9).toInt(), 0),
+                Math.max((color.green * 0.9).toInt(), 0),
+                Math.max((color.blue * 0.9).toInt(), 0),
+                color.alpha)
+    }
+
+    fun brighter(color: Color): Color {
+        var r = color.red
+        var g = color.green
+        var b = color.blue
+        val alpha = color.alpha
+
+        var FACTOR = 0.7
+        /* From 2D group:
+         * 1. black.brighter() should return grey
+         * 2. applying brighter to blue will always return blue, brighter
+         * 3. non pure color (non zero rgb) will eventually return white
+         */
+        val i = (1.0 / (1.0 - FACTOR)).toInt()
+        if (r == 0 && g == 0 && b == 0) {
+            return Color(i, i, i, alpha)
+        }
+        if (r > 0 && r < i) r = i
+        if (g > 0 && g < i) g = i
+        if (b > 0 && b < i) b = i
+
+        return Color(Math.min((r / FACTOR).toInt(), 255),
+                Math.min((g / FACTOR).toInt(), 255),
+                Math.min((b / FACTOR).toInt(), 255),
+                alpha)
     }
 
     private fun refreshSelection() {
