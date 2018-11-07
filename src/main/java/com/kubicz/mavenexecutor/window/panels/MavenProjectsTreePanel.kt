@@ -1,11 +1,13 @@
-package com.kubicz.mavenexecutor.window
+package com.kubicz.mavenexecutor.window.panels
 
 import com.intellij.ui.CheckboxTreeAdapter
 import com.intellij.ui.CheckedTreeNode
 import com.intellij.ui.ScrollPaneFactory
-import com.kubicz.mavenexecutor.model.Mavenize
-import com.kubicz.mavenexecutor.model.ProjectRootNode
-import com.kubicz.mavenexecutor.model.ProjectToBuild
+import com.kubicz.mavenexecutor.model.tree.Mavenize
+import com.kubicz.mavenexecutor.model.tree.ProjectRootNode
+import com.kubicz.mavenexecutor.model.settings.ProjectToBuild
+import com.kubicz.mavenexecutor.window.MavenExecutorService
+import com.kubicz.mavenexecutor.window.MavenProjectsTree
 import org.jetbrains.idea.maven.project.MavenProjectsManager
 import javax.swing.JComponent
 
@@ -51,8 +53,8 @@ class MavenProjectsTreePanel(projectsManager: MavenProjectsManager, settingsServ
         if (projectRootNode.isSelected()) {
             projectToBuild = ProjectToBuild(projectRootNode.getDisplayName(), projectRootNode.mavenArtifact, projectRootNode.projectDirectory.path)
         } else {
-            val modules = selectedModule.map { it.mavenArtifact }.toList()
-            projectToBuild = ProjectToBuild(projectRootNode.getDisplayName(), projectRootNode.mavenArtifact, projectRootNode.projectDirectory.path, modules)
+            val modules = selectedModule.map { it.mavenArtifact }.toMutableList()
+            projectToBuild = ProjectToBuild(projectRootNode.displayName, projectRootNode.mavenArtifact, projectRootNode.projectDirectory.path, modules)
         }
 
         return projectToBuild

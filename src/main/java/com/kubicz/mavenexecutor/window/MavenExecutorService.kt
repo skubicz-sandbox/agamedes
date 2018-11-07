@@ -7,14 +7,15 @@ import com.intellij.openapi.components.Storage
 import com.intellij.openapi.project.Project
 import com.intellij.util.xmlb.XmlSerializerUtil
 import com.intellij.util.xmlb.annotations.Property
-import com.intellij.util.xmlb.annotations.Tag
+import com.kubicz.mavenexecutor.model.settings.History
+import com.kubicz.mavenexecutor.model.settings.ExecutionSettings
 import java.util.*
 
 @State(name = "mavenExecutorSetting", storages = [Storage("mavenExecutorSetting.xml")])
 class MavenExecutorService : PersistentStateComponent<MavenExecutorService> {
 
     @Property
-    var defaultSettings = MavenExecutorSetting()
+    var defaultSettings = ExecutionSettings()
 
     @Property
     var currentSettingsLabel: String? = null
@@ -26,15 +27,15 @@ class MavenExecutorService : PersistentStateComponent<MavenExecutorService> {
     var jvmOptionHistory: History = History()
 
     @Property
-    private var favorite = HashMap<String, MavenExecutorSetting>()
+    private var favorite = HashMap<String, ExecutionSettings>()
 
-    val favoriteSettings: List<MavenExecutorSetting>
+    val favoriteSettings: List<ExecutionSettings>
         get() = favorite.values.toList()
 
     val favoriteSettingsNames: List<String>
         get() = favorite.keys.toList()
 
-    val currentSettings: MavenExecutorSetting
+    val currentSettings: ExecutionSettings
         get() {
             return favorite.getOrDefault(currentSettingsLabel, defaultSettings)
         }
@@ -54,7 +55,7 @@ class MavenExecutorService : PersistentStateComponent<MavenExecutorService> {
         XmlSerializerUtil.copyBean(state, this)
     }
 
-    fun addSettings(settingsName: String, setting: MavenExecutorSetting) {
+    fun addSettings(settingsName: String, setting: ExecutionSettings) {
         favorite[settingsName] = setting
     }
 

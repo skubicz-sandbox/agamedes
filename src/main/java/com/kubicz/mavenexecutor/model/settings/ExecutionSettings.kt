@@ -1,13 +1,11 @@
-package com.kubicz.mavenexecutor.window
+package com.kubicz.mavenexecutor.model.settings
 
 import com.google.common.collect.Lists
 import com.intellij.util.xmlb.annotations.Property
-import com.intellij.util.xmlb.annotations.Tag
-import com.kubicz.mavenexecutor.model.ProjectToBuild
 import java.io.Serializable
 
 
-class MavenExecutorSetting: Cloneable, Serializable {
+class ExecutionSettings: Cloneable, Serializable {
 
     @Property
     var goals: MutableList<String> = ArrayList()
@@ -43,15 +41,15 @@ class MavenExecutorSetting: Cloneable, Serializable {
     var projectsToBuild: MutableList<ProjectToBuild> = ArrayList()
 
     fun goalsAsText(): String {
-        return ListTextMapper.listAsText(goals, " ")
+        return goals.joinToString(" ")
     }
 
     fun optionalJvmOptionsAsText(): String {
-        return ListTextMapper.listAsText(optionalJvmOptions, " ")
+        return optionalJvmOptions.joinToString(" ")
     }
 
     fun jvmOptionsAsText(): String {
-        return ListTextMapper.listAsText(jvmOptions, " ")
+        return jvmOptions.joinToString(" ")
     }
 
     fun goalsFromText(goalsText: String) {
@@ -61,10 +59,5 @@ class MavenExecutorSetting: Cloneable, Serializable {
             goals = Lists.newArrayList(*goalsText.split("\\s".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray())
         }
     }
-
-//    @Attribute("offlineMode")
-//    fun isOfflineMode(): Boolean {
-//        return offlineMode
-//    }
 
 }

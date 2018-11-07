@@ -75,16 +75,5 @@
                 class="MavenReimportAction"
                 text="Reimport All Maven Projects" />
 
-
-        <group id="MyPlugin.SampleMenu" text="Greeting" description="Greeting menu">
-            <add-to-group group-id="MainMenu" anchor="last"/>
-            <action id="Myplugin.Textboxes" class="HelloAction" text="Hello" description="Says hello"/>
-        </group>
-
-<!--        <group id="Myplugin.ActionsToolbar">
-            <action id="Myplugin.Refresh"
-                    icon="AllIcons.Actions.Refresh"
-                    class="HelloAction"  text="Says hello"/>
-        </group>-->
     </actions>
 </idea-plugin>

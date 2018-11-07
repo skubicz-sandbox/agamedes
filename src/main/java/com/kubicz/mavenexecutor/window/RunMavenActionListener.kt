@@ -8,7 +8,8 @@ import com.intellij.execution.executors.DefaultRunExecutor
 import com.intellij.execution.impl.DefaultJavaProgramRunner
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.openapi.project.Project
-import com.kubicz.mavenexecutor.model.ProjectToBuild
+import com.kubicz.mavenexecutor.model.settings.ExecutionSettings
+import com.kubicz.mavenexecutor.model.settings.ProjectToBuild
 import myToolWindow.MyMavenRunConfiguration
 import myToolWindow.MyMavenRunConfigurationType
 import org.jetbrains.idea.maven.execution.MavenRunnerParameters
@@ -64,7 +65,7 @@ class RunMavenActionListener(private val project: Project) : ActionListener {
         return mavenAdditionalParameters
     }
 
-    private fun mavenRunnerParameters(setting: MavenExecutorSetting, projectToBuild: ProjectToBuild): MavenRunnerParameters {
+    private fun mavenRunnerParameters(setting: ExecutionSettings, projectToBuild: ProjectToBuild): MavenRunnerParameters {
         val mavenRunnerParameters = MavenRunnerParameters()
 
         mavenRunnerParameters.workingDirPath = projectToBuild.projectDictionary
@@ -74,7 +75,7 @@ class RunMavenActionListener(private val project: Project) : ActionListener {
         return mavenRunnerParameters
     }
 
-    private fun mavenGeneralSettings(setting: MavenExecutorSetting): MavenGeneralSettings {
+    private fun mavenGeneralSettings(setting: ExecutionSettings): MavenGeneralSettings {
         val mavenGeneralSettings = MavenGeneralSettings()
 
         mavenGeneralSettings.isWorkOffline = setting.isOfflineMode
@@ -93,7 +94,7 @@ class RunMavenActionListener(private val project: Project) : ActionListener {
 
     }
 
-    private fun mavenRunnerSettings(setting: MavenExecutorSetting): MavenRunnerSettings {
+    private fun mavenRunnerSettings(setting: ExecutionSettings): MavenRunnerSettings {
         val mavenRunnerSettings = MavenRunnerSettings()
 
         var jvmOptions = setting.jvmOptionsAsText()

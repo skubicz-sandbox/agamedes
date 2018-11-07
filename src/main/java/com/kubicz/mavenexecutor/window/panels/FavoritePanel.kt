@@ -1,9 +1,9 @@
-package com.kubicz.mavenexecutor.window
+package com.kubicz.mavenexecutor.window.panels
 
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.DefaultActionGroup
-import com.intellij.openapi.project.Project
 import com.intellij.util.ui.JBUI
+import com.kubicz.mavenexecutor.window.MavenExecutorService
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.event.MouseAdapter

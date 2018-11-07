@@ -1,6 +1,7 @@
-package com.kubicz.mavenexecutor.model;
+package com.kubicz.mavenexecutor.model.tree;
 
 import com.intellij.openapi.vfs.VirtualFile;
+import com.kubicz.mavenexecutor.model.MavenArtifact;
 
 public class ProjectRootNode implements Mavenize {
 

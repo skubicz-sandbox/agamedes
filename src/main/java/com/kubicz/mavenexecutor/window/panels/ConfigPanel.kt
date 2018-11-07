@@ -1,4 +1,4 @@
-package com.kubicz.mavenexecutor.window
+package com.kubicz.mavenexecutor.window.panels
 
 import com.google.common.collect.Lists
 import com.intellij.icons.AllIcons
@@ -13,6 +13,11 @@ import com.intellij.ui.EditorTextField
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.StringComboboxEditor
 import com.intellij.ui.components.fields.IntegerField
+import com.kubicz.mavenexecutor.model.settings.History
+import com.kubicz.mavenexecutor.window.CustomCheckBoxList
+import com.kubicz.mavenexecutor.window.GridBagConstraintsBuilder
+import com.kubicz.mavenexecutor.window.MavenExecutorService
+import com.kubicz.mavenexecutor.window.RunMavenActionListener
 import org.jetbrains.idea.maven.execution.MavenArgumentsCompletionProvider
 import org.jetbrains.idea.maven.project.MavenProjectsManager
 import java.awt.Dimension
@@ -56,7 +61,7 @@ class ConfigPanel(project: Project,
 
     private val settingsService = settingsService
 
-    private val setHistory: ComboBox<String>.(History) -> Unit = {history -> model = DefaultComboBoxModel<String>(history.asArray())}
+    private val setHistory: ComboBox<String>.(History) -> Unit = { history -> model = DefaultComboBoxModel<String>(history.asArray())}
 
     private val initEditor: ComboBox<String>.(String) -> Unit = {
         val comboEditor = StringComboboxEditor(project, PlainTextFileType.INSTANCE, this)

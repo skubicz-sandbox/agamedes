@@ -1,7 +1,12 @@
 package com.kubicz.mavenexecutor.window
 
 import com.intellij.ui.*
-import com.kubicz.mavenexecutor.model.*
+import com.kubicz.mavenexecutor.model.MavenArtifact
+import com.kubicz.mavenexecutor.model.settings.MavenArtifactFactory
+import com.kubicz.mavenexecutor.model.settings.ProjectToBuild
+import com.kubicz.mavenexecutor.model.tree.Mavenize
+import com.kubicz.mavenexecutor.model.tree.ProjectModuleNode
+import com.kubicz.mavenexecutor.model.tree.ProjectRootNode
 import org.jetbrains.idea.maven.project.MavenProject
 import org.jetbrains.idea.maven.project.MavenProjectsManager
 import java.util.*

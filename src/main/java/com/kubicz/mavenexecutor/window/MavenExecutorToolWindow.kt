@@ -11,6 +11,10 @@ import com.intellij.openapi.roots.ModuleRootListener
 import com.intellij.openapi.ui.SimpleToolWindowPanel
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.ui.content.ContentFactory
+import com.kubicz.mavenexecutor.window.panels.ConfigPanel
+import com.kubicz.mavenexecutor.window.panels.FavoritePanel
+import com.kubicz.mavenexecutor.window.panels.MavenProjectsTreePanel
+import com.kubicz.mavenexecutor.window.panels.SelectCurrentPanel
 import org.jetbrains.idea.maven.project.MavenProjectsManager
 import java.awt.Dimension
 import java.awt.GridBagLayout

@@ -1,9 +1,10 @@
-package com.kubicz.mavenexecutor.window
+package com.kubicz.mavenexecutor.window.panels
 
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.kubicz.mavenexecutor.model.MavenArtifact
-import com.kubicz.mavenexecutor.model.MavenArtifactFactory
-import com.kubicz.mavenexecutor.model.ProjectToBuildBuilder
+import com.kubicz.mavenexecutor.model.settings.MavenArtifactFactory
+import com.kubicz.mavenexecutor.model.settings.ProjectToBuildBuilder
+import com.kubicz.mavenexecutor.window.MavenExecutorService
 import org.jetbrains.idea.maven.project.MavenProjectsManager
 import java.awt.Dimension
 import java.util.*
@@ -59,7 +60,7 @@ class SelectCurrentPanel(projectsManager: MavenProjectsManager, settingsService:
                         val rootArtifact = MavenArtifactFactory.from(currentRootProject.mavenId)
 
                         val projectToBuildBuilder = projectsToBuild
-                                .firstOrNull { item -> item.mavenArtifact.equalsGroupAndArtifactId(rootArtifact) }
+                                .firstOrNull { item -> item.mavenArtifact!!.equalsGroupAndArtifactId(rootArtifact) }
                                 ?: ProjectToBuildBuilder(currentRootProject.displayName, rootArtifact, currentRootProject.directoryFile.path)
 
                         if (!projectsToBuild.contains(projectToBuildBuilder)) {

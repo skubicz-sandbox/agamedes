@@ -1,4 +1,6 @@
-package com.kubicz.mavenexecutor.model;
+package com.kubicz.mavenexecutor.model.tree;
+
+import com.kubicz.mavenexecutor.model.MavenArtifact;
 
 public class ProjectModuleNode implements Mavenize {
 

@@ -1,7 +1,6 @@
-package com.kubicz.mavenexecutor.window
+package com.kubicz.mavenexecutor.model.settings
 
 import com.intellij.util.xmlb.annotations.Property
-import java.io.Serializable
 
 class History {
 
