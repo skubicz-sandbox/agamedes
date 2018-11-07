@@ -45,12 +45,6 @@ class MavenProjectsTree(projectsManager: MavenProjectsManager, selectedNodes: Li
     init {
         this.tree = MyCheckboxTree(renderer, null)
 
-        this.tree.addCheckboxTreeListener(object : CheckboxTreeAdapter() {
-            override fun nodeStateChanged(node: CheckedTreeNode) {
-           //     (node.userObject as? ProjectRootNode)?.isSelected = node.isChecked
-            }
-        })
-
         update(selectedNodes)
     }
 
@@ -62,7 +56,7 @@ class MavenProjectsTree(projectsManager: MavenProjectsManager, selectedNodes: Li
                     mavenProject.directoryFile))
 
             val project = selectedNodes.findProject(rootMavenArtifact)
-            rootProjectNode.isChecked = project?.buildEntireProject() ?: false
+            tree.setNodeState(rootProjectNode, project?.buildEntireProject() ?: false)
 
             createChildrenNodes(mavenProject, rootProjectNode)
 
@@ -109,7 +103,7 @@ class MavenProjectsTree(projectsManager: MavenProjectsManager, selectedNodes: Li
                 checkedAllTreeNode(childNode)
             } else {
                 if (childNode.isLeaf) {
-                    childNode.isChecked = selectedProject?.buildEntireProject() ?: false
+                    tree.setNodeState(childNode, selectedProject?.buildEntireProject() ?: false)
                 } else {
                     checkedSelectedTreeNode(childNode, selectedProject?.selectedModules ?: ArrayList())
                 }
@@ -152,7 +146,7 @@ class MavenProjectsTree(projectsManager: MavenProjectsManager, selectedNodes: Li
     }
 
     private fun checkedAllTreeNode(node: CheckedTreeNode) {
-        node.isChecked = true
+        tree.setNodeState(node, true)
 
         val childCount = node.childCount
 
@@ -160,7 +154,7 @@ class MavenProjectsTree(projectsManager: MavenProjectsManager, selectedNodes: Li
             val childNode = node.getChildAt(i) as CheckedTreeNode
 
             if (childNode.isLeaf) {
-                childNode.isChecked = true
+                tree.setNodeState(childNode, true)
             } else {
                 checkedAllTreeNode(childNode)
             }
@@ -169,7 +163,7 @@ class MavenProjectsTree(projectsManager: MavenProjectsManager, selectedNodes: Li
 
     private fun checkedSelectedTreeNode(node: CheckedTreeNode, selectedNodes: List<MavenArtifact>) {
         if (node.isLeaf) {
-            node.isChecked = selectedNodes.findArtifact(node.nodeData().mavenArtifact) != null
+            tree.setNodeState(node, selectedNodes.findArtifact(node.nodeData().mavenArtifact) != null)
             return
         }
 
@@ -179,7 +173,7 @@ class MavenProjectsTree(projectsManager: MavenProjectsManager, selectedNodes: Li
             val childNode = node.getChildAt(i) as CheckedTreeNode
 
             if (childNode.isLeaf) {
-                childNode.isChecked = selectedNodes.findArtifact(childNode.nodeData().mavenArtifact) != null
+                tree.setNodeState(childNode, selectedNodes.findArtifact(childNode.nodeData().mavenArtifact) != null)
             } else {
                 checkedSelectedTreeNode(childNode, selectedNodes)
             }

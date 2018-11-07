@@ -47,6 +47,10 @@ open class MyCheckboxTreeBase @JvmOverloads constructor(cellRenderer: MyCheckbox
         myEventDispatcher.addListener(listener)
     }
 
+    fun setNodeState(node: CheckedTreeNode, checked: Boolean) {
+        myHelper.setNodeState(this, node, checked)
+    }
+
     protected fun onDoubleClick(node: CheckedTreeNode) {}
 
     override fun getToggleClickCount(): Int {
