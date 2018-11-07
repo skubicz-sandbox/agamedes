@@ -62,8 +62,7 @@ class MavenProjectsTree(projectsManager: MavenProjectsManager, selectedNodes: Li
         val root = CheckedTreeNode(null)
         for (mavenProject in projectsManager.rootProjects) {
             val rootMavenArtifact = MavenArtifactFactory.from(mavenProject.mavenId)
-            val rootProjectNode = CheckedTreeNode(ProjectRootNode.of(mavenProject.displayName, rootMavenArtifact, false,
-                    mavenProject.directoryFile))
+            val rootProjectNode = CheckedTreeNode(ProjectRootNode.of(mavenProject.displayName, rootMavenArtifact, mavenProject.directoryFile))
 
             val project = selectedNodes.findProject(rootMavenArtifact)
             tree.setNodeState(rootProjectNode, project?.buildEntireProject() ?: false)
