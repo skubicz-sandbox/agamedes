@@ -48,19 +48,19 @@
             <separator/>
 
             <action id="EasyMavenBuilder.JvmOptionsDialog"
-                icon="AllIcons.General.GearPlain"
+                icon="/myToolWindow/jvm16x16.png"
                 class="org.kubicz.mavenexecutor.view.window.actions.toolbar.OpenJvmOptionsDialogAction"
                 text="Jvm Options" />
 
             <action id="EasyMavenBuilder.OpenEnvironmentVariablesDialog"
-                icon="AllIcons.Javaee.WebServiceClient"
+                icon="/myToolWindow/env_var16x16.png"
                 class="org.kubicz.mavenexecutor.view.window.actions.toolbar.OpenEnvironmentVariablesDialogAction"
                 text="Environment Variables" />
 
             <action id="EasyMavenBuilder.OpenMavenSettings"
                 class="org.kubicz.mavenexecutor.view.window.actions.toolbar.OpenMavenSettingsAction" text="Maven Settings"
                 description="Edit Maven integration settings for the current project"
-                icon="AllIcons.General.ProjectSettings">
+                icon="AllIcons.General.Settings">
             </action>
 
             <action id="EasyMavenBuilder.SaveSettings"
