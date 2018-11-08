@@ -4,7 +4,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import org.kubicz.mavenexecutor.model.MavenArtifact
 import org.kubicz.mavenexecutor.model.settings.MavenArtifactFactory
 import org.kubicz.mavenexecutor.model.settings.ProjectToBuildBuilder
-import org.kubicz.mavenexecutor.view.window.MavenExecutorService
+import org.kubicz.mavenexecutor.view.window.ExecutionSettingsService
 import org.jetbrains.idea.maven.project.MavenProjectsManager
 import java.awt.Dimension
 import java.util.*
@@ -13,7 +13,7 @@ import javax.swing.JButton
 import javax.swing.JComponent
 import javax.swing.JPanel
 
-class SelectCurrentPanel(projectsManager: MavenProjectsManager, settingsService: MavenExecutorService,
+class SelectCurrentPanel(projectsManager: MavenProjectsManager, settingsService: ExecutionSettingsService,
                          fileEditorManager: FileEditorManager, selectCurrentListener: () -> Unit) {
 
     private var panel = JPanel()

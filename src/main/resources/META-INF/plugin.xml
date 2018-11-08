@@ -29,7 +29,7 @@
             factoryClass="org.kubicz.mavenexecutor.view.window.MavenExecutorToolWindowFactory" />
 
         <projectService serviceImplementation="org.kubicz.mavenexecutor.view.window.MavenExecutorToolWindow"/>
-        <projectService serviceImplementation="org.kubicz.mavenexecutor.view.window.MavenExecutorService"/>
+        <projectService serviceImplementation="org.kubicz.mavenexecutor.view.window.ExecutionSettingsService"/>
     </extensions>
 
     <actions>

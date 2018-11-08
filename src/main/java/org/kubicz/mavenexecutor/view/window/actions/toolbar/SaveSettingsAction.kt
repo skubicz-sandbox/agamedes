@@ -3,7 +3,7 @@ package org.kubicz.mavenexecutor.view.window.actions.toolbar
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.util.xmlb.XmlSerializerUtil
-import org.kubicz.mavenexecutor.view.window.MavenExecutorService
+import org.kubicz.mavenexecutor.view.window.ExecutionSettingsService
 import org.kubicz.mavenexecutor.model.settings.ExecutionSettings
 import org.kubicz.mavenexecutor.view.window.MavenExecutorToolWindow
 import myToolWindow.SaveConfirmationDialog
@@ -11,7 +11,7 @@ import myToolWindow.SaveConfirmationDialog
 class SaveSettingsAction : AnAction("") {
 
     override fun actionPerformed(event: AnActionEvent) {
-        val settingsService = MavenExecutorService.getInstance(event.project!!)
+        val settingsService = ExecutionSettingsService.getInstance(event.project!!)
 
         val saveConfirmationDialog = SaveConfirmationDialog(event.project)
         saveConfirmationDialog.setSettingsName(settingsService.currentSettingsLabel)

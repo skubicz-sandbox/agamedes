@@ -5,14 +5,13 @@ import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.util.ui.JBUI
 import org.kubicz.mavenexecutor.view.components.CustomButton
-import org.kubicz.mavenexecutor.view.window.MavenExecutorService
-import java.awt.Color
+import org.kubicz.mavenexecutor.view.window.ExecutionSettingsService
 import java.awt.Dimension
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import javax.swing.*
 
-class FavoritePanel(settingsService: MavenExecutorService, changeSettingListener: () -> Unit) {
+class FavoritePanel(settingsService: ExecutionSettingsService, changeSettingListener: () -> Unit) {
 
     private var panel = JPanel()
 

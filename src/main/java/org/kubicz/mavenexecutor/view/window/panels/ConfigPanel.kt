@@ -14,13 +14,12 @@ import com.intellij.ui.EditorTextField
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.StringComboboxEditor
 import com.intellij.ui.components.fields.IntegerField
-import org.kubicz.mavenexecutor.model.settings.History
-import org.kubicz.mavenexecutor.view.components.CustomCheckBoxList
-import org.kubicz.mavenexecutor.view.window.GridBagConstraintsBuilder
-import org.kubicz.mavenexecutor.view.window.MavenExecutorService
 import org.jetbrains.idea.maven.execution.MavenArgumentsCompletionProvider
 import org.jetbrains.idea.maven.project.MavenProjectsManager
-import java.awt.Color
+import org.kubicz.mavenexecutor.model.settings.History
+import org.kubicz.mavenexecutor.view.components.CustomCheckBoxList
+import org.kubicz.mavenexecutor.view.window.ExecutionSettingsService
+import org.kubicz.mavenexecutor.view.window.GridBagConstraintsBuilder
 import java.awt.Dimension
 import java.awt.GridBagLayout
 import java.awt.event.FocusAdapter
@@ -28,7 +27,7 @@ import java.awt.event.FocusEvent
 import javax.swing.*
 
 class ConfigPanel(project: Project,
-                  settingsService: MavenExecutorService) {
+                  settingsService: ExecutionSettingsService) {
 
     private val project = project;
 
@@ -161,7 +160,7 @@ class ConfigPanel(project: Project,
         val innerPropertiesPanel = JPanel(GridBagLayout())
 
         offlineModeCheckBox.isSelected = settingsService.currentSettings.isOfflineMode
-        offlineModeCheckBox.addActionListener { event ->
+        offlineModeCheckBox.addActionListener {
             settingsService.currentSettings.isOfflineMode = offlineModeCheckBox.isSelected
         }
         innerPropertiesPanel.add(offlineModeCheckBox, GridBagConstraintsBuilder().fillHorizontal().build())
@@ -197,12 +196,12 @@ class ConfigPanel(project: Project,
         innerPropertiesPanel.add(JPanel(), GridBagConstraintsBuilder().anchorEast().fillNone().gridx(0).gridy(3).gridwidth(2).build())
 
         optionalJvmOptionsCheckBox.isSelected = settingsService.currentSettings.isUseOptionalJvmOptions
-        optionalJvmOptionsCheckBox.addActionListener { event ->
+        optionalJvmOptionsCheckBox.addActionListener {
             optionalJvmOptionsComboBox.isEnabled = optionalJvmOptionsCheckBox.isSelected
             settingsService.currentSettings.isUseOptionalJvmOptions = optionalJvmOptionsCheckBox.isSelected
 
         }
-        innerPropertiesPanel.add(optionalJvmOptionsCheckBox, GridBagConstraintsBuilder().anchorWest().fillNone().gridx(0).gridy(4).build())
+        innerPropertiesPanel.add(optionalJvmOptionsCheckBox, GridBagConstraintsBuilder().anchorWest().fillNone().gridx(0).gridy(4).gridwidth(2).build())
         innerPropertiesPanel.maximumSize = Dimension(200, 80)
 
         val projectsManager = MavenProjectsManager.getInstance(project)

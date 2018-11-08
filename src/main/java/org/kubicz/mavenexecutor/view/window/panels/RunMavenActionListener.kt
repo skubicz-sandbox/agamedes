@@ -18,14 +18,14 @@ import org.jetbrains.idea.maven.project.MavenGeneralSettings
 import org.jetbrains.idea.maven.project.MavenProjectsManager
 import org.jetbrains.idea.maven.utils.MavenUtil
 import org.kubicz.mavenexecutor.view.window.MavenAdditionalParameters
-import org.kubicz.mavenexecutor.view.window.MavenExecutorService
+import org.kubicz.mavenexecutor.view.window.ExecutionSettingsService
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 
 class RunMavenActionListener(private val project: Project) : ActionListener {
 
     override fun actionPerformed(event: ActionEvent) {
-        val settings = MavenExecutorService.getInstance(project).currentSettings
+        val settings = ExecutionSettingsService.getInstance(project).currentSettings
 
         val runConfigurationType = ConfigurationTypeUtil.findConfigurationType(MavenExecutorRunConfigurationType::class.java)
 

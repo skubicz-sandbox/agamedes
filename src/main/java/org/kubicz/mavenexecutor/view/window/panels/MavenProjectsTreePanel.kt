@@ -7,10 +7,10 @@ import org.jetbrains.idea.maven.project.MavenProjectsManager
 import org.kubicz.mavenexecutor.model.settings.ProjectToBuild
 import org.kubicz.mavenexecutor.model.tree.Mavenize
 import org.kubicz.mavenexecutor.model.tree.ProjectRootNode
-import org.kubicz.mavenexecutor.view.window.MavenExecutorService
+import org.kubicz.mavenexecutor.view.window.ExecutionSettingsService
 import javax.swing.JComponent
 
-class MavenProjectsTreePanel(projectsManager: MavenProjectsManager, settingsService: MavenExecutorService, nodeStateChangedListener: () -> Unit) {
+class MavenProjectsTreePanel(projectsManager: MavenProjectsManager, settingsService: ExecutionSettingsService, nodeStateChangedListener: () -> Unit) {
 
     private val projectsTree = MavenProjectsTree(projectsManager, settingsService.currentSettings.projectsToBuild)
 

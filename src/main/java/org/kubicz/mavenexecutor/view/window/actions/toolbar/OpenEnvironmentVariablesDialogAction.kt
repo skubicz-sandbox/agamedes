@@ -5,13 +5,13 @@ import com.intellij.execution.util.EnvironmentVariable
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.ui.DialogBuilder
-import org.kubicz.mavenexecutor.view.window.MavenExecutorService
+import org.kubicz.mavenexecutor.view.window.ExecutionSettingsService
 
 
 class OpenEnvironmentVariablesDialogAction : AnAction("") {
 
     override fun actionPerformed(event: AnActionEvent) {
-        val setting = MavenExecutorService.getInstance(event.project!!).currentSettings
+        val setting = ExecutionSettingsService.getInstance(event.project!!).currentSettings
 
         val builder = DialogBuilder()
         builder.setTitle("Configure Environment Variables")

@@ -5,7 +5,7 @@ import com.intellij.util.xmlb.annotations.Property
 import java.io.Serializable
 
 
-class ExecutionSettings: Cloneable, Serializable {
+class ExecutionSettings {
 
     @Property
     var goals: MutableList<String> = ArrayList()

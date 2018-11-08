@@ -29,7 +29,7 @@ class MavenExecutorToolWindow(private var project: Project) {
 
     private val toolWindowContent = SimpleToolWindowPanel(true, true)
 
-    private var settingsService = MavenExecutorService.getInstance(project)
+    private var settingsService = ExecutionSettingsService.getInstance(project)
 
     private val configPanel = ConfigPanel(project, settingsService)
 

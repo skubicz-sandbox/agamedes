@@ -12,7 +12,7 @@ import org.kubicz.mavenexecutor.model.settings.ExecutionSettings
 import java.util.*
 
 @State(name = "mavenExecutorSetting", storages = [Storage("mavenExecutorSetting.xml")])
-class MavenExecutorService : PersistentStateComponent<MavenExecutorService> {
+class ExecutionSettingsService : PersistentStateComponent<ExecutionSettingsService> {
 
     @Property
     var defaultSettings = ExecutionSettings()
@@ -47,11 +47,11 @@ class MavenExecutorService : PersistentStateComponent<MavenExecutorService> {
     init {
     }
 
-    override fun getState(): MavenExecutorService? {
+    override fun getState(): ExecutionSettingsService? {
         return this
     }
 
-    override fun loadState(state: MavenExecutorService) {
+    override fun loadState(state: ExecutionSettingsService) {
         XmlSerializerUtil.copyBean(state, this)
     }
 
@@ -72,8 +72,8 @@ class MavenExecutorService : PersistentStateComponent<MavenExecutorService> {
     }
 
     companion object {
-        fun getInstance(project: Project): MavenExecutorService {
-            return ServiceManager.getService(project, MavenExecutorService::class.java)
+        fun getInstance(project: Project): ExecutionSettingsService {
+            return ServiceManager.getService(project, ExecutionSettingsService::class.java)
         }
     }
 
