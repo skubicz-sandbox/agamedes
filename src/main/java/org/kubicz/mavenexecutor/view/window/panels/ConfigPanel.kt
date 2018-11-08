@@ -20,6 +20,7 @@ import org.kubicz.mavenexecutor.model.settings.History
 import org.kubicz.mavenexecutor.view.components.CustomCheckBoxList
 import org.kubicz.mavenexecutor.view.window.ExecutionSettingsService
 import org.kubicz.mavenexecutor.view.window.GridBagConstraintsBuilder
+import org.kubicz.mavenexecutor.view.window.panels.MavenExecutorBundle.Companion.message
 import java.awt.Dimension
 import java.awt.GridBagLayout
 import java.awt.event.FocusAdapter
@@ -49,7 +50,7 @@ class ConfigPanel(project: Project,
 
     private var alwaysUpdateModeCheckBox = JCheckBox("Update snapshots")
 
-    private var threadsLabel = JLabel("Threads:")
+    private var threadsLabel = JLabel(message("mavenExecutor.threads"))
 
     private var threadsTextField = IntegerField(null, 0, 99)
 
@@ -132,7 +133,7 @@ class ConfigPanel(project: Project,
             }
         })
 
-        val label = JLabel("Goals")
+        val label = JLabel(message("mavenExecutor.goals"))
 
         val groupLayout = GroupLayout(goalsSubPanel)
         groupLayout.autoCreateGaps = true
