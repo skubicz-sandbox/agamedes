@@ -12,8 +12,8 @@ import org.kubicz.mavenexecutor.model.settings.ProjectToBuild
 import org.kubicz.mavenexecutor.model.tree.Mavenize
 import org.kubicz.mavenexecutor.model.tree.ProjectModuleNode
 import org.kubicz.mavenexecutor.model.tree.ProjectRootNode
-import org.kubicz.mavenexecutor.view.components.CheckboxTree
-import org.kubicz.mavenexecutor.view.components.CheckboxTreeBase
+import org.kubicz.mavenexecutor.view.components.CustomCheckboxTree
+import org.kubicz.mavenexecutor.view.components.CustomCheckboxTreeBase
 import java.util.*
 import java.util.function.Predicate
 import javax.swing.JTree
@@ -23,7 +23,7 @@ import javax.swing.tree.TreeModel
 
 class MavenProjectsTree(projectsManager: MavenProjectsManager, selectedNodes: List<ProjectToBuild>) {
 
-    private val tree: CheckboxTree
+    private val tree: CustomCheckboxTree
 
     private val projectsManager = projectsManager
 
@@ -37,7 +37,7 @@ class MavenProjectsTree(projectsManager: MavenProjectsManager, selectedNodes: Li
 
     private val nodeData: CheckedTreeNode.() -> Mavenize = { userObject as Mavenize }
 
-    private val renderer = object : CheckboxTreeBase.CheckboxTreeCellRendererBase() {
+    private val renderer = object : CustomCheckboxTreeBase.CheckboxTreeCellRendererBase() {
         override fun customizeRenderer(tree: JTree, value: Any, selected: Boolean, expanded: Boolean, leaf: Boolean, row: Int, hasFocus: Boolean) {
             var userObject = (value as DefaultMutableTreeNode).userObject
 
@@ -53,7 +53,7 @@ class MavenProjectsTree(projectsManager: MavenProjectsManager, selectedNodes: Li
         get() = tree
 
     init {
-        this.tree = CheckboxTree(renderer, null)
+        this.tree = CustomCheckboxTree(renderer, null)
 
         update(selectedNodes)
     }

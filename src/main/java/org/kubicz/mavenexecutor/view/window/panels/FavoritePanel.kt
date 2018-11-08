@@ -1,8 +1,10 @@
 package org.kubicz.mavenexecutor.view.window.panels
 
+import com.intellij.ide.ui.LafManager
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.util.ui.JBUI
+import org.kubicz.mavenexecutor.view.components.CustomButton
 import org.kubicz.mavenexecutor.view.window.MavenExecutorService
 import java.awt.Color
 import java.awt.Dimension
@@ -16,13 +18,12 @@ class FavoritePanel(settingsService: MavenExecutorService, changeSettingListener
 
     private val settingsService = settingsService;
 
-    private var defaultSettingsButton = JButton("DEFAULT")
+    private var defaultSettingsButton = CustomButton("DEFAULT")
 
     private val isDefault: JButton.() -> Boolean = {name == "default"}
 
-    private val init: JButton.(Boolean) -> Unit = {selected ->
-   //     background = color(selected)
-        putClientProperty("JButton.backgroundColor", color(selected))
+    private val init: CustomButton.(Boolean) -> Unit = {selected ->
+        overrideBackground(selected)
 
         maximumSize = Dimension(Integer.MAX_VALUE, maximumSize.getHeight().toInt())
 
@@ -47,11 +48,16 @@ class FavoritePanel(settingsService: MavenExecutorService, changeSettingListener
         get() : JComponent = panel
 
     init {
+        LafManager.getInstance().addLafManagerListener {
+            refresh()
+        }
+
         initComponents()
     }
 
     fun refresh() {
         panel.removeAll()
+        defaultSettingsButton = CustomButton("DEFAULT")
 
         initComponents()
 
@@ -76,7 +82,7 @@ class FavoritePanel(settingsService: MavenExecutorService, changeSettingListener
         panel.add(favoriteLabel)
 
         settingsService.favoriteSettingsNames.forEach { settingName ->
-            val button = JButton(settingName)
+            val button = CustomButton(settingName)
 
             button.init(settingName == currentSettingsLabel)
 
@@ -93,66 +99,15 @@ class FavoritePanel(settingsService: MavenExecutorService, changeSettingListener
 
     }
 
-    private fun color(selected: Boolean): Color {
-        var defaultColor = UIManager.getColor("Button.background")
-        return if(selected) {
-            if(defaultColor.blue < 100) {
-                brighter(defaultColor)
-            }
-            else {
-                darker(defaultColor)
-            }
-        } else {
-            defaultColor
-        }
-     //   return if(selected) Color(200, 200, 200) else Color(227, 227, 227)
-    }//javax.swing.plaf.ColorUIResource[r=60,g=63,b=65]
-
-    fun darker(color: Color): Color {
-        return Color(Math.max((color.red * 0.8).toInt(), 0),
-                Math.max((color.green * 0.8).toInt(), 0),
-                Math.max((color.blue * 0.8).toInt(), 0),
-                color.alpha)
-    }
-
-    fun brighter(color: Color): Color {
-        var r = color.red
-        var g = color.green
-        var b = color.blue
-        val alpha = color.alpha
-
-        var FACTOR = 0.8
-        /* From 2D group:
-         * 1. black.brighter() should return grey
-         * 2. applying brighter to blue will always return blue, brighter
-         * 3. non pure color (non zero rgb) will eventually return white
-         */
-        val i = (1.0 / (1.0 - FACTOR)).toInt()
-        if (r == 0 && g == 0 && b == 0) {
-            return Color(i, i, i, alpha)
-        }
-        if (r > 0 && r < i) r = i
-        if (g > 0 && g < i) g = i
-        if (b > 0 && b < i) b = i
-
-        return Color(Math.min((r / FACTOR).toInt(), 255),
-                Math.min((g / FACTOR).toInt(), 255),
-                Math.min((b / FACTOR).toInt(), 255),
-                alpha)
-    }
-
     private fun refreshSelection() {
         panel.components.forEach {
-            if (it is JButton) {
+            if (it is CustomButton) {
                 if(it.isDefault()) {
-               //     it.background = color(settingsService.isDefaultSettings)
-                    it.putClientProperty("JButton.backgroundColor", color(settingsService.isDefaultSettings))
+                    it.overrideBackground(settingsService.isDefaultSettings)
                 }
                 else {
-              //      it.background = color(settingsService.currentSettingsLabel == it.text)
-                    it.putClientProperty("JButton.backgroundColor", color(settingsService.currentSettingsLabel == it.text))
+                    it.overrideBackground(settingsService.currentSettingsLabel == it.text)
                 }
-                it.repaint()
             }
         }
     }

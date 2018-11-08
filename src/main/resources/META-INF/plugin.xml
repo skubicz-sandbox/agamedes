@@ -45,6 +45,12 @@
                 class="org.kubicz.mavenexecutor.view.window.actions.toolbar.MavenReimportAction"
                 text="Reimport All Maven Projects" />
 
+            <action id="EasyMavenBuilder.OpenMavenSettings"
+                class="org.kubicz.mavenexecutor.view.window.actions.toolbar.OpenMavenSettingsAction" text="Maven Settings"
+                description="Edit Maven integration settings for the current project"
+                icon="AllIcons.General.Settings">
+            </action>
+
             <separator/>
 
             <action id="EasyMavenBuilder.JvmOptionsDialog"
@@ -57,23 +63,15 @@
                 class="org.kubicz.mavenexecutor.view.window.actions.toolbar.OpenEnvironmentVariablesDialogAction"
                 text="Environment Variables" />
 
-            <action id="EasyMavenBuilder.OpenMavenSettings"
-                class="org.kubicz.mavenexecutor.view.window.actions.toolbar.OpenMavenSettingsAction" text="Maven Settings"
-                description="Edit Maven integration settings for the current project"
-                icon="AllIcons.General.Settings">
-            </action>
+            <separator/>
 
             <action id="EasyMavenBuilder.SaveSettings"
-                    class="org.kubicz.mavenexecutor.view.window.actions.toolbar.SaveSettingsAction" text="Save Settings"
-                    description="Edit Maven integration settings for the current project"
-                    icon="AllIcons.Actions.Menu_saveall">
+                class="org.kubicz.mavenexecutor.view.window.actions.toolbar.SaveSettingsAction" text="Save Settings"
+                description="Edit Maven integration settings for the current project"
+                icon="AllIcons.Actions.Menu_saveall">
             </action>
-        </group>
 
-        <action id="EasyMavenBuilder.RunMaven"
-                icon="AllIcons.General.Run"
-                class="org.kubicz.mavenexecutor.view.window.actions.toolbar.MavenReimportAction"
-                text="Reimport All Maven Projects" />
+        </group>
 
     </actions>
 </idea-plugin>

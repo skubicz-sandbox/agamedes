@@ -2,6 +2,7 @@ package org.kubicz.mavenexecutor.view.window.panels
 
 import com.google.common.collect.Lists
 import com.intellij.icons.AllIcons
+import com.intellij.ide.ui.LafManager
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.fileTypes.PlainTextFileType
@@ -19,6 +20,7 @@ import org.kubicz.mavenexecutor.view.window.GridBagConstraintsBuilder
 import org.kubicz.mavenexecutor.view.window.MavenExecutorService
 import org.jetbrains.idea.maven.execution.MavenArgumentsCompletionProvider
 import org.jetbrains.idea.maven.project.MavenProjectsManager
+import java.awt.Color
 import java.awt.Dimension
 import java.awt.GridBagLayout
 import java.awt.event.FocusAdapter
@@ -76,13 +78,19 @@ class ConfigPanel(project: Project,
         get() : JComponent = panel
 
     init {
+        LafManager.getInstance().addLafManagerListener {
+            profiles = CustomCheckBoxList()
+
+            updateProfile()
+        }
+
         panel.layout = BoxLayout(panel, BoxLayout.PAGE_AXIS)
 
         createGoalsSubPanel()
 
         createPropertiesSubPanel()
 
-        createSkipPluginSubPanel()
+        createOptionalJvmOptionsSubPanel()
 
         panel.add(goalsSubPanel)
         panel.add(propertiesSubPanel)
@@ -185,7 +193,17 @@ class ConfigPanel(project: Project,
         }
         innerPropertiesPanel.add(threadsTextField, GridBagConstraintsBuilder().anchorEast().fillNone().gridx(1).gridy(1).build())
 
-        innerPropertiesPanel.maximumSize = Dimension(200, 50)
+        innerPropertiesPanel.add(JPanel(), GridBagConstraintsBuilder().anchorEast().fillNone().gridx(0).gridy(2).gridwidth(2).build())
+        innerPropertiesPanel.add(JPanel(), GridBagConstraintsBuilder().anchorEast().fillNone().gridx(0).gridy(3).gridwidth(2).build())
+
+        optionalJvmOptionsCheckBox.isSelected = settingsService.currentSettings.isUseOptionalJvmOptions
+        optionalJvmOptionsCheckBox.addActionListener { event ->
+            optionalJvmOptionsComboBox.isEnabled = optionalJvmOptionsCheckBox.isSelected
+            settingsService.currentSettings.isUseOptionalJvmOptions = optionalJvmOptionsCheckBox.isSelected
+
+        }
+        innerPropertiesPanel.add(optionalJvmOptionsCheckBox, GridBagConstraintsBuilder().anchorWest().fillNone().gridx(0).gridy(4).build())
+        innerPropertiesPanel.maximumSize = Dimension(200, 80)
 
         val projectsManager = MavenProjectsManager.getInstance(project)
         //profiles.setItems(Lists.newArrayList(projectsManager.getAvailableProfiles()), a -> a);
@@ -210,25 +228,17 @@ class ConfigPanel(project: Project,
         propertiesGroupLayout.setVerticalGroup(
                 propertiesGroupLayout.createSequentialGroup()
                         .addGroup(propertiesGroupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                .addComponent(innerPropertiesPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, java.lang.Short.MAX_VALUE.toInt())
+                                .addComponent(innerPropertiesPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Int.MAX_VALUE)
                                 .addComponent(profilesScrollPane)
                         )
         )
     }
 
-    private fun createSkipPluginSubPanel() {
+    private fun createOptionalJvmOptionsSubPanel() {
         val optionalJvmOptionsLayout = GroupLayout(optionalJvmOptionsSubPanel)
         optionalJvmOptionsLayout.autoCreateGaps = true
         optionalJvmOptionsLayout.autoCreateContainerGaps = true
         optionalJvmOptionsSubPanel.layout = optionalJvmOptionsLayout
-
-        optionalJvmOptionsCheckBox.isSelected = settingsService.currentSettings.isUseOptionalJvmOptions
-
-        optionalJvmOptionsCheckBox.addActionListener { event ->
-            optionalJvmOptionsComboBox.isEnabled = optionalJvmOptionsCheckBox.isSelected
-            settingsService.currentSettings.isUseOptionalJvmOptions = optionalJvmOptionsCheckBox.isSelected
-
-        }
 
         optionalJvmOptionsComboBox.setHistory(settingsService.jvmOptionHistory)
         optionalJvmOptionsComboBox.initEditor(settingsService.currentSettings.optionalJvmOptionsAsText())
@@ -256,13 +266,13 @@ class ConfigPanel(project: Project,
 
         optionalJvmOptionsLayout.setHorizontalGroup(
                 optionalJvmOptionsLayout.createSequentialGroup()
-                        .addComponent(optionalJvmOptionsCheckBox)
+           //             .addComponent(optionalJvmOptionsCheckBox)
                         .addComponent(optionalJvmOptionsComboBox)
         )
         optionalJvmOptionsLayout.setVerticalGroup(
                 optionalJvmOptionsLayout.createSequentialGroup()
                         .addGroup(optionalJvmOptionsLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                .addComponent(optionalJvmOptionsCheckBox, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Int.MAX_VALUE)
+                  //              .addComponent(optionalJvmOptionsCheckBox, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Int.MAX_VALUE)
                                 .addComponent(optionalJvmOptionsComboBox, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Int.MAX_VALUE)
                         )
         )

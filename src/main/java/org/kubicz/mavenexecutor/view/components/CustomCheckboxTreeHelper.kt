@@ -17,9 +17,9 @@ import javax.swing.JComponent
 import javax.swing.tree.TreeNode
 import javax.swing.tree.TreePath
 
-class CheckboxTreeHelper(private val checkPolicy: CheckboxTreeBase.CheckPolicy, private val myEventDispatcher: EventDispatcher<CheckboxTreeListener>) {
+class CustomCheckboxTreeHelper(private val checkPolicy: CustomCheckboxTreeBase.CheckPolicy, private val myEventDispatcher: EventDispatcher<CheckboxTreeListener>) {
 
-    fun initTree(tree: Tree, mainComponent: JComponent, cellRenderer: CheckboxTreeBase.CheckboxTreeCellRendererBase) {
+    fun initTree(tree: Tree, mainComponent: JComponent, cellRenderer: CustomCheckboxTreeBase.CheckboxTreeCellRendererBase) {
         removeTreeListeners(mainComponent)
         tree.cellRenderer = cellRenderer
         tree.isRootVisible = false
@@ -162,7 +162,7 @@ class CheckboxTreeHelper(private val checkPolicy: CheckboxTreeBase.CheckPolicy, 
         return listener
     }
 
-    private fun setupMouseListener(tree: Tree, mainComponent: JComponent, cellRenderer: CheckboxTreeBase.CheckboxTreeCellRendererBase): ClickListener {
+    private fun setupMouseListener(tree: Tree, mainComponent: JComponent, cellRenderer: CustomCheckboxTreeBase.CheckboxTreeCellRendererBase): ClickListener {
         val listener = object : ClickListener() {
             override fun onClick(e: MouseEvent, clickCount: Int): Boolean {
                 val row = tree.getRowForLocation(e.x, e.y)
@@ -199,7 +199,7 @@ class CheckboxTreeHelper(private val checkPolicy: CheckboxTreeBase.CheckPolicy, 
     companion object {
 
         private val TREE_LISTENERS_REMOVER = Key.create<Runnable>("TREE_LISTENERS_REMOVER")
-        val DEFAULT_POLICY = CheckboxTreeBase.CheckPolicy(true, true, false, true)
+        val DEFAULT_POLICY = CustomCheckboxTreeBase.CheckPolicy(true, true, false, true)
 
         fun isToggleEvent(e: KeyEvent, mainComponent: JComponent): Boolean {
             return e.keyCode == KeyEvent.VK_SPACE && SpeedSearchSupply.getSupply(mainComponent) == null

@@ -15,14 +15,14 @@ import javax.swing.tree.DefaultTreeModel
 import javax.swing.tree.TreeCellRenderer
 
 @Suppress("UNUSED_PARAMETER")
-open class CheckboxTreeBase @JvmOverloads constructor(cellRenderer: CheckboxTreeCellRendererBase = CheckboxTreeCellRendererBase(), root: CheckedTreeNode? = null, checkPolicy: CheckPolicy = CheckboxTreeHelper.DEFAULT_POLICY) : Tree() {
+open class CustomCheckboxTreeBase @JvmOverloads constructor(cellRenderer: CheckboxTreeCellRendererBase = CheckboxTreeCellRendererBase(), root: CheckedTreeNode? = null, checkPolicy: CheckPolicy = CustomCheckboxTreeHelper.DEFAULT_POLICY) : Tree() {
 
-    private val helper: CheckboxTreeHelper
+    private val helper: CustomCheckboxTreeHelper
 
     private val myEventDispatcher = EventDispatcher.create(CheckboxTreeListener::class.java)
 
     init {
-        helper = CheckboxTreeHelper(checkPolicy, myEventDispatcher)
+        helper = CustomCheckboxTreeHelper(checkPolicy, myEventDispatcher)
         if (root != null) {
             model = DefaultTreeModel(root)
             setSelectionRow(0)
@@ -33,11 +33,11 @@ open class CheckboxTreeBase @JvmOverloads constructor(cellRenderer: CheckboxTree
             }
 
             override fun nodeStateChanged(node: CheckedTreeNode) {
-                this@CheckboxTreeBase.onNodeStateChanged(node)
+                this@CustomCheckboxTreeBase.onNodeStateChanged(node)
             }
 
             override fun beforeNodeStateChanged(node: CheckedTreeNode) {
-                this@CheckboxTreeBase.nodeStateWillChange(node)
+                this@CustomCheckboxTreeBase.nodeStateWillChange(node)
             }
         })
         helper.initTree(this, this, cellRenderer)
