@@ -6,6 +6,8 @@ import org.kubicz.mavenexecutor.model.settings.MavenArtifactFactory
 import org.kubicz.mavenexecutor.model.settings.ProjectToBuildBuilder
 import org.kubicz.mavenexecutor.view.window.ExecutionSettingsService
 import org.jetbrains.idea.maven.project.MavenProjectsManager
+import org.kubicz.mavenexecutor.view.MavenExecutorBundle
+import org.kubicz.mavenexecutor.view.MavenExecutorBundle.Companion.message
 import java.awt.Dimension
 import java.util.*
 import javax.swing.BoxLayout
@@ -24,7 +26,7 @@ class SelectCurrentPanel(projectsManager: MavenProjectsManager, settingsService:
 
     private val fileEditorManager = fileEditorManager
 
-    private var selectCurrentButton: JButton = JButton("Select current")
+    private var selectCurrentButton: JButton = JButton(message("mavenExecutor.selectCurrent.label"))
 
     init {
         panel.layout = BoxLayout(panel, BoxLayout.PAGE_AXIS)

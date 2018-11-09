@@ -36,7 +36,7 @@
         <group id="EasyMavenBuilder.FavoriteItemContextMenu">
             <action id="EasyMavenBuilder.RemoveFavorite"
                     class="org.kubicz.mavenexecutor.view.window.actions.favorite.RemoveFavoriteAction"
-                    text="Remove" />
+                    text="Remove Settings" />
         </group>
 
         <group id="EasyMavenBuilder.ActionsToolbar">
@@ -56,17 +56,18 @@
             <action id="EasyMavenBuilder.JvmOptionsDialog"
                 icon="/icons/jvmOptions.png"
                 class="org.kubicz.mavenexecutor.view.window.actions.toolbar.OpenJvmOptionsDialogAction"
-                text="Jvm Options" />
+                text="Configure Jvm Options" />
 
             <action id="EasyMavenBuilder.OpenEnvironmentVariablesDialog"
                 icon="/icons/environmentVariables.png"
                 class="org.kubicz.mavenexecutor.view.window.actions.toolbar.OpenEnvironmentVariablesDialogAction"
-                text="Environment Variables" />
+                text="Configure Environment Variables" />
 
             <separator/>
 
             <action id="EasyMavenBuilder.SaveSettings"
-                class="org.kubicz.mavenexecutor.view.window.actions.toolbar.SaveSettingsAction" text="Save Settings"
+                class="org.kubicz.mavenexecutor.view.window.actions.toolbar.SaveSettingsAction"
+                text="Save Current Settings as..."
                 description="Edit Maven integration settings for the current project"
                 icon="AllIcons.Actions.Menu_saveall">
             </action>

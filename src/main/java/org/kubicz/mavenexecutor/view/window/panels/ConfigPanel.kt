@@ -20,7 +20,7 @@ import org.kubicz.mavenexecutor.model.settings.History
 import org.kubicz.mavenexecutor.view.components.CustomCheckBoxList
 import org.kubicz.mavenexecutor.view.window.ExecutionSettingsService
 import org.kubicz.mavenexecutor.view.window.GridBagConstraintsBuilder
-import org.kubicz.mavenexecutor.view.window.panels.MavenExecutorBundle.Companion.message
+import org.kubicz.mavenexecutor.view.MavenExecutorBundle.Companion.message
 import java.awt.Dimension
 import java.awt.GridBagLayout
 import java.awt.event.FocusAdapter
@@ -44,17 +44,17 @@ class ConfigPanel(project: Project,
 
     private var runMavenButton = JButton()
 
-    private var offlineModeCheckBox = JCheckBox("Offline")
+    private var offlineModeCheckBox = JCheckBox(message("mavenExecutor.offline.label"))
 
-    private var skipTestCheckBox = JCheckBox("Skip tests")
+    private var skipTestCheckBox = JCheckBox(message("mavenExecutor.skipTest.label"))
 
-    private var alwaysUpdateModeCheckBox = JCheckBox("Update snapshots")
+    private var alwaysUpdateModeCheckBox = JCheckBox(message("mavenExecutor.alwaysUpdateMode.label"))
 
-    private var threadsLabel = JLabel(message("mavenExecutor.threads"))
+    private var threadsLabel = JLabel(message("mavenExecutor.threads.label"))
 
     private var threadsTextField = IntegerField(null, 0, 99)
 
-    private var optionalJvmOptionsCheckBox = JCheckBox("JVM options:")
+    private var optionalJvmOptionsCheckBox = JCheckBox(message("mavenExecutor.optionalJvmOptions.label"))
 
     private var optionalJvmOptionsComboBox = ComboBox<String>()
 
@@ -112,6 +112,8 @@ class ConfigPanel(project: Project,
         val goalsEditor = goalsComboBox.editor.editorComponent as EditorTextField
         MavenArgumentsCompletionProvider(project).apply(goalsEditor)
 
+        goalsComboBox.toolTipText = message("mavenExecutor.goals.toolTip")
+
         goalsComboBox.editor.item = settingsService.currentSettings.goalsAsText()
 
         goalsEditor.addDocumentListener(object : DocumentListener {
@@ -133,7 +135,8 @@ class ConfigPanel(project: Project,
             }
         })
 
-        val label = JLabel(message("mavenExecutor.goals"))
+        val label = JLabel(message("mavenExecutor.goals.label"))
+        label.toolTipText = message("mavenExecutor.goals.toolTip")
 
         val groupLayout = GroupLayout(goalsSubPanel)
         groupLayout.autoCreateGaps = true
@@ -161,6 +164,7 @@ class ConfigPanel(project: Project,
         val innerPropertiesPanel = JPanel(GridBagLayout())
 
         offlineModeCheckBox.isSelected = settingsService.currentSettings.isOfflineMode
+        offlineModeCheckBox.toolTipText = message("mavenExecutor.offline.toolTip")
         offlineModeCheckBox.addActionListener {
             settingsService.currentSettings.isOfflineMode = offlineModeCheckBox.isSelected
         }
@@ -196,6 +200,7 @@ class ConfigPanel(project: Project,
         innerPropertiesPanel.add(JPanel(), GridBagConstraintsBuilder().anchorEast().fillNone().gridx(0).gridy(2).gridwidth(2).build())
         innerPropertiesPanel.add(JPanel(), GridBagConstraintsBuilder().anchorEast().fillNone().gridx(0).gridy(3).gridwidth(2).build())
 
+        optionalJvmOptionsCheckBox.toolTipText= message("mavenExecutor.optionalJvmOptions.toolTip")
         optionalJvmOptionsCheckBox.isSelected = settingsService.currentSettings.isUseOptionalJvmOptions
         optionalJvmOptionsCheckBox.addActionListener {
             optionalJvmOptionsComboBox.isEnabled = optionalJvmOptionsCheckBox.isSelected
@@ -206,7 +211,6 @@ class ConfigPanel(project: Project,
         innerPropertiesPanel.maximumSize = Dimension(200, 80)
 
         val projectsManager = MavenProjectsManager.getInstance(project)
-        //profiles.setItems(Lists.newArrayList(projectsManager.getAvailableProfiles()), a -> a);
         projectsManager.availableProfiles.forEach { profile -> profiles.addItem(profile, profile, settingsService.currentSettings.profiles.contains(profile)) }
         profiles.setCheckBoxListListener { _, _ -> settingsService.currentSettings.profiles = profiles.selectedItemNames }
 
@@ -266,13 +270,11 @@ class ConfigPanel(project: Project,
 
         optionalJvmOptionsLayout.setHorizontalGroup(
                 optionalJvmOptionsLayout.createSequentialGroup()
-           //             .addComponent(optionalJvmOptionsCheckBox)
                         .addComponent(optionalJvmOptionsComboBox)
         )
         optionalJvmOptionsLayout.setVerticalGroup(
                 optionalJvmOptionsLayout.createSequentialGroup()
                         .addGroup(optionalJvmOptionsLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                  //              .addComponent(optionalJvmOptionsCheckBox, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Int.MAX_VALUE)
                                 .addComponent(optionalJvmOptionsComboBox, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Int.MAX_VALUE)
                         )
         )

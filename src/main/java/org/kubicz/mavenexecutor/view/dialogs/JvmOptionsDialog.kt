@@ -2,6 +2,8 @@ package myToolWindow
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
+import org.kubicz.mavenexecutor.view.MavenExecutorBundle
+import org.kubicz.mavenexecutor.view.MavenExecutorBundle.Companion.message
 import javax.swing.JComponent
 import javax.swing.JPanel
 import javax.swing.JTextArea
@@ -20,7 +22,7 @@ class JvmOptionsDialog(project: Project?) : DialogWrapper(project) {
 
     init {
         isModal = true
-        title = "Configure JVM Options"
+        title = message("mavenExecutor.jvmOptions.dialog.title")
 
         init()
     }

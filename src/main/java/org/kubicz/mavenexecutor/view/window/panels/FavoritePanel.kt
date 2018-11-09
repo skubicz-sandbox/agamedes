@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.util.ui.JBUI
 import org.kubicz.mavenexecutor.view.components.CustomButton
 import org.kubicz.mavenexecutor.view.window.ExecutionSettingsService
+import org.kubicz.mavenexecutor.view.MavenExecutorBundle.Companion.message
 import java.awt.Dimension
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
@@ -17,7 +18,7 @@ class FavoritePanel(settingsService: ExecutionSettingsService, changeSettingList
 
     private val settingsService = settingsService;
 
-    private var defaultSettingsButton = CustomButton("DEFAULT")
+    private var defaultSettingsButton = CustomButton(message("mavenExecutor.default.label"))
 
     private val isDefault: JButton.() -> Boolean = {name == "default"}
 
@@ -56,7 +57,7 @@ class FavoritePanel(settingsService: ExecutionSettingsService, changeSettingList
 
     fun refresh() {
         panel.removeAll()
-        defaultSettingsButton = CustomButton("DEFAULT")
+        defaultSettingsButton = CustomButton(message("mavenExecutor.default.label"))
 
         initComponents()
 
@@ -76,7 +77,7 @@ class FavoritePanel(settingsService: ExecutionSettingsService, changeSettingList
 
         panel.add(defaultSettingsButton)
 
-        val favoriteLabel = JLabel("Favorite:", null, SwingConstants.CENTER)
+        val favoriteLabel = JLabel(message("mavenExecutor.favorite.label"), null, SwingConstants.CENTER)
         favoriteLabel.maximumSize = Dimension(Integer.MAX_VALUE, favoriteLabel.maximumSize.getHeight().toInt())
         panel.add(favoriteLabel)
 

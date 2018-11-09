@@ -1,4 +1,4 @@
-package org.kubicz.mavenexecutor.view.window.panels
+package org.kubicz.mavenexecutor.view
 
 import com.intellij.AbstractBundle
 import org.jetbrains.annotations.PropertyKey
